@@ -321,6 +321,21 @@ fn test_mutable_reference() {
     change_value(&mut name);
     change_value(&mut name);
     change_value(&mut name);
-    
+
     println!("name: {}", name);
+}
+
+// slice
+
+// range
+#[test]
+fn slice_reference() {
+    let array : [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let slice1 : &[i32] = &array[..];
+    let slice2  = &array[0..5];
+    let slice3 : &[i32] = &array[5..];
+    
+    println!("slice1: {:?}", slice1);
+    println!("slice2: {:?}", slice2);
+    println!("slice3: {:?}", slice3);
 }
