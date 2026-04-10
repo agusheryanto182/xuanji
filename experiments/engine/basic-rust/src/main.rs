@@ -367,6 +367,13 @@ struct Person {
     age: u8,
 }
 
+// method is a function that is associated with a struct
+impl Person {
+    fn say_hello(&self, name: &str) {
+        println!("Hello, {}! My name is {}", name, self.first_name);
+    }
+}
+
 fn print_person (person: &Person) {
     println!("first_name: {}", person.first_name);
     println!("last_name: {}", person.last_name);
@@ -406,7 +413,21 @@ fn struct_person() {
     print_person(&person3);
 }
 
+// tuple struct
 struct GeoPoint(f64, f64);
+
+impl GeoPoint {
+    fn new (long: f64, lat: f64) -> GeoPoint {
+        GeoPoint(long, lat)
+    }
+}
+
+#[test]
+fn test_associated_function() {
+    let geo_point:GeoPoint = GeoPoint::new(1.0, 2.0);
+    println!("geo_point: {:?}", geo_point.0);
+    println!("geo_point: {:?}", geo_point.1);
+}
 
 #[test]
 fn tuple_struct() {
@@ -421,4 +442,15 @@ struct Nothing;
 fn test_nothing(){
     let _nothing1 = Nothing;
     let _nothing2 = Nothing{};
+}
+
+#[test]
+fn test_method() {
+    let person = Person {
+        first_name: String::from("Raychellz"),
+        last_name: String::from("Vermillion"),
+        age: 99
+    };
+
+    person.say_hello("Suga");
 }
