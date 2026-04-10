@@ -339,3 +339,23 @@ fn slice_reference() {
     println!("slice2: {:?}", slice2);
     println!("slice3: {:?}", slice3);
 }
+
+#[test]
+fn string_slice_1() {
+    let name = String::from("Raychellz Vermillion");
+
+    let first_name = &name[0..9];
+    println!("{}", first_name);
+
+    let last_name = &name[10..20];
+    println!("{}", last_name);
+
+    let first_name_1 = first_name;
+    println!("{}", first_name_1);
+
+    // note
+    // name owns the String data in the heap
+    // first_name is a &str slice pointing to "Raychellz" inside name's heap data
+    // last_name is a &str slice pointing to "Vermillion" inside name's heap data
+    // first_name_1 is a copy of first_name (same pointer + length), pointing to the same slice
+}
