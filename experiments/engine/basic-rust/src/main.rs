@@ -454,3 +454,39 @@ fn test_method() {
 
     person.say_hello("Suga");
 }
+
+// enum
+enum  Level {
+    Regular,
+    Premium,
+    Platinum
+}
+
+#[test]
+fn test_enum() {
+    let _level1 = Level::Platinum;
+}
+
+enum Payment {
+    CreditCard(String),
+    BankTransfer(String, String),
+    EWallet (String, String)
+}
+
+impl Payment {
+    fn pay(&self, amount: u128) {
+        println!("Paying amount: {}", amount);
+    }
+}
+
+#[test]
+fn test_payment() {
+    let _payment1 = Payment::CreditCard(String::from("21212121"));
+    _payment1.pay(1010101);
+
+    let _payment2 = Payment::BankTransfer(String::from("21212121"), String::from("21212121"));
+    _payment2.pay(1010101);
+
+    let _payment3 = Payment::EWallet(String::from("21212121"), String::from("21212121"));
+    _payment3.pay(10101099991);
+}
