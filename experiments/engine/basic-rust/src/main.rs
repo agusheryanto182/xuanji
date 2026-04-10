@@ -473,6 +473,7 @@ enum Payment {
     EWallet (String, String)
 }
 
+// method from enum
 impl Payment {
     fn pay(&self, amount: u128) {
         println!("Paying amount: {}", amount);
