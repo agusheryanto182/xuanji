@@ -359,3 +359,66 @@ fn string_slice_1() {
     // last_name is a &str slice pointing to "Vermillion" inside name's heap data
     // first_name_1 is a copy of first_name (same pointer + length), pointing to the same slice
 }
+
+
+struct Person {
+    first_name: String,
+    last_name: String,
+    age: u8,
+}
+
+fn print_person (person: &Person) {
+    println!("first_name: {}", person.first_name);
+    println!("last_name: {}", person.last_name);
+    println!("age: {}", person.age);
+}
+
+// struct
+#[test]
+fn struct_person() {
+    let first_name = String::from("Raychellz");
+    let last_name = String::from("Vermillion");
+
+    let person: Person = Person {
+        first_name,
+        last_name,
+        age: 99,
+    };
+
+    // println!("first_name: {}", person.first_name);
+    // println!("last_name: {}", person.last_name);
+    // println!("age: {}", person.age);
+
+    print_person(&person);
+
+    let person2 = Person{..person};
+    print_person(&person2);
+
+    // comment out cause the ownership has been moved to person2!
+    // solution: clone
+    // print_person(&person);
+
+    let person3 = Person{
+        first_name: person2.first_name.clone(),
+        last_name: person2.last_name.clone(),
+        ..person2
+    };
+    print_person(&person3);
+}
+
+struct GeoPoint(f64, f64);
+
+#[test]
+fn tuple_struct() {
+    let point = GeoPoint(1.0, 2.0);
+    println!("point.0: {}", point.0);
+    println!("point.1: {}", point.1);
+}
+
+struct Nothing;
+
+#[test]
+fn test_nothing(){
+    let _nothing1 = Nothing;
+    let _nothing2 = Nothing{};
+}
