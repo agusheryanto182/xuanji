@@ -187,7 +187,7 @@ fn factorial_loop_test() {
 // - Fast
 // - Stores data of a fixed size (known at compile time)
 
-// Stack:
+// Heap:
 // - Doesn't have a sorted order like FIFO/LIFO
 // - More flexible but slower
 // - Used for dynamically sized data
@@ -490,4 +490,21 @@ fn test_payment() {
 
     let _payment3 = Payment::EWallet(String::from("21212121"), String::from("21212121"));
     _payment3.pay(10101099991);
+}
+
+// pattern matching for enum
+#[test]
+fn test_pattern_matching_enum() {
+    let level = Level::Premium;
+    match level {
+        Level::Regular => {
+            println!("Regular")
+        },
+        Level::Premium => {
+            println!("Premium")
+        },
+        Level::Platinum => {
+            println!("Platinum")
+        },
+    }
 }
