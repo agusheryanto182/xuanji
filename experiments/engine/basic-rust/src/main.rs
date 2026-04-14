@@ -629,3 +629,28 @@ fn test_match_expression() {
 
     println!("result: {}", result)
 }
+
+// type alias
+type Age = u8;
+type IdentityNumber = String;
+
+struct Customer {
+    id: IdentityNumber,
+    name: String,
+    age: Age
+}
+
+type Pelanggan = Customer;
+
+#[test]
+fn test_type_alias() {
+    let customer = Customer{
+        id: String::from("123456789"),
+        name: String::from("suga"),
+        age: 20
+    };
+
+    println!("id: {}", customer.id);
+    println!("name: {}", customer.name);
+    println!("age: {}", customer.age);
+}
