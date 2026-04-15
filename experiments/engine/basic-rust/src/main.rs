@@ -1,5 +1,29 @@
+// module outside
+mod first;
+mod model;
+mod second;
+
+mod first_inside {
+    pub fn say_hello() {
+        println!("Hello from first module!");
+    }
+}
+
+mod second_inside {
+    pub fn say_hello() {
+        println!("Hello from second module!");
+    }
+}
+
 fn main() {
-    println!("Hello, world!");
+    let user = model::User {
+        first_name: String::from("suga"),
+        last_name: String::from("vermillion"),
+        username: String::from("suga_username"),
+        email: String::from("suga@mahasibuk.com"),
+        age: 20,
+    };
+    user.say_hello("sugax");
 }
 
 #[test]
@@ -35,7 +59,7 @@ fn immutable_variable() {
     let count = 0;
 
     // comment out to pass the test
-    // count += 1; 
+    // count += 1;
 
     println!("Count: {}", count);
 }
@@ -77,7 +101,7 @@ fn number() {
 
     // _ is unused variable
     let _y = 2.0;
-    
+
     println!("x: {}", x);
 }
 
@@ -100,22 +124,22 @@ fn tuple() {
 
 #[test]
 fn number_conversion() {
-    let x : i8 = 10;
-    let y : i16 = x as i16;
-    
+    let x: i8 = 10;
+    let y: i16 = x as i16;
+
     println!("x: {}, y: {}", x, y);
 }
 
 #[test]
 fn char_type() {
-    let x : char = 'a';
+    let x: char = 'a';
     println!("x: {}", x);
 }
 
 #[test]
 fn string_slice() {
-    let x : &str = "suga";
-    let trim = x.trim();        
+    let x: &str = "suga";
+    let trim = x.trim();
 
     println!("x: {}", x);
     println!("trim: {}", trim);
@@ -123,7 +147,7 @@ fn string_slice() {
 
 #[test]
 fn string_type() {
-    let x : String = String::from("suga");
+    let x: String = String::from("suga");
     let trim = x.trim();
 
     println!("x: {}", x);
@@ -132,8 +156,8 @@ fn string_type() {
 
 #[test]
 fn copy_type() {
-    let x : i32 = 1;
-    let y : i32 = x;
+    let x: i32 = 1;
+    let y: i32 = x;
 
     println!("x: {}", x);
     println!("y: {}", y);
@@ -141,30 +165,30 @@ fn copy_type() {
 
 #[test]
 fn owner_type() {
-    let x : String = String::from("suga");
-    let y : String = x;
+    let x: String = String::from("suga");
+    let y: String = x;
 
     // comment out, cause the x is moved to y, and x is no longer valid
-    // println!("x: {}", x); 
+    // println!("x: {}", x);
     println!("y: {}", y);
 }
 
 #[test]
 fn clone_type() {
-    let x : String = String::from("suga");
-    let y : String = x.clone();
+    let x: String = String::from("suga");
+    let y: String = x.clone();
 
-    println!("x: {}", x); 
+    println!("x: {}", x);
     println!("y: {}", y);
 }
 
-fn _factorial_loop (n: i32) -> i32 {
+fn _factorial_loop(n: i32) -> i32 {
     if n < 1 {
         return 0;
     }
-    
+
     let mut result = 1;
-    
+
     for i in 1..=n {
         result *= i;
     }
@@ -215,7 +239,7 @@ fn factorial_loop_test() {
 // when owner goes out of scope, the value will be dropped
 
 // ownership in function
-fn print_number (number: i32) {
+fn print_number(number: i32) {
     println!("number: {}", number);
 }
 
@@ -236,7 +260,7 @@ fn test_ownership() {
 }
 
 // return value ownership
-fn full_name (first_name: String, last_name: String) -> String {
+fn full_name(first_name: String, last_name: String) -> String {
     format!("{} {}", first_name, last_name)
 }
 
@@ -254,9 +278,9 @@ fn test_return_value_ownership() {
 }
 
 // return the ownership
-fn full_name_2 (first_name: String, last_name: String) -> (String, String, String) {
+fn full_name_2(first_name: String, last_name: String) -> (String, String, String) {
     let full_name = format!("{} {}", first_name, last_name);
-    
+
     (first_name, last_name, full_name)
 }
 
@@ -272,7 +296,7 @@ fn test_take_ownership() {
 }
 
 // references and borrowing
-fn full_name_3 (first_name: &str, last_name: &str) -> String {
+fn full_name_3(first_name: &str, last_name: &str) -> String {
     format!("{} {}", first_name, last_name)
 }
 
@@ -288,7 +312,7 @@ fn test_references_and_borrowing_1() {
     println!("full_name: {}", full_name);
 }
 
-fn full_name_4 (first_name: &String, last_name: &String) -> String {
+fn full_name_4(first_name: &String, last_name: &String) -> String {
     format!("{} {}", first_name, last_name)
 }
 
@@ -311,7 +335,7 @@ fn test_references_and_borrowing_2() {
 // 2. To create a mutable reference, the original variable must be declared as `mut`
 // 3. While a mutable reference exists, you cannot access the original variable or create other references
 // 4. After the mutable reference is no longer used, the original variable can be used again
-fn change_value (value: &mut String) {
+fn change_value(value: &mut String) {
     value.push_str(" test");
 }
 
@@ -330,11 +354,11 @@ fn test_mutable_reference() {
 // range
 #[test]
 fn slice_reference() {
-    let array : [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    let slice1 : &[i32] = &array[..];
-    let slice2  = &array[0..5];
-    let slice3 : &[i32] = &array[5..];
-    
+    let array: [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let slice1: &[i32] = &array[..];
+    let slice2 = &array[0..5];
+    let slice3: &[i32] = &array[5..];
+
     println!("slice1: {:?}", slice1);
     println!("slice2: {:?}", slice2);
     println!("slice3: {:?}", slice3);
@@ -360,7 +384,6 @@ fn string_slice_1() {
     // first_name_1 is a copy of first_name (same pointer + length), pointing to the same slice
 }
 
-
 struct Person {
     first_name: String,
     last_name: String,
@@ -374,7 +397,7 @@ impl Person {
     }
 }
 
-fn print_person (person: &Person) {
+fn print_person(person: &Person) {
     println!("first_name: {}", person.first_name);
     println!("last_name: {}", person.last_name);
     println!("age: {}", person.age);
@@ -398,14 +421,14 @@ fn struct_person() {
 
     print_person(&person);
 
-    let person2 = Person{..person};
+    let person2 = Person { ..person };
     print_person(&person2);
 
     // comment out cause the ownership has been moved to person2!
     // solution: clone
     // print_person(&person);
 
-    let person3 = Person{
+    let person3 = Person {
         first_name: person2.first_name.clone(),
         last_name: person2.last_name.clone(),
         ..person2
@@ -417,14 +440,14 @@ fn struct_person() {
 struct GeoPoint(f64, f64);
 
 impl GeoPoint {
-    fn new (long: f64, lat: f64) -> GeoPoint {
+    fn new(long: f64, lat: f64) -> GeoPoint {
         GeoPoint(long, lat)
     }
 }
 
 #[test]
 fn test_associated_function() {
-    let geo_point:GeoPoint = GeoPoint::new(1.0, 2.0);
+    let geo_point: GeoPoint = GeoPoint::new(1.0, 2.0);
     println!("geo_point: {:?}", geo_point.0);
     println!("geo_point: {:?}", geo_point.1);
 }
@@ -439,9 +462,9 @@ fn tuple_struct() {
 struct Nothing;
 
 #[test]
-fn test_nothing(){
+fn test_nothing() {
     let _nothing1 = Nothing;
-    let _nothing2 = Nothing{};
+    let _nothing2 = Nothing {};
 }
 
 #[test]
@@ -449,17 +472,17 @@ fn test_method() {
     let person = Person {
         first_name: String::from("Raychellz"),
         last_name: String::from("Vermillion"),
-        age: 99
+        age: 99,
     };
 
     person.say_hello("Suga");
 }
 
 // enum
-enum  Level {
+enum Level {
     Regular,
     Premium,
-    Platinum
+    Platinum,
 }
 
 #[test]
@@ -470,7 +493,7 @@ fn test_enum() {
 enum Payment {
     CreditCard(String),
     BankTransfer(String, String),
-    EWallet (String, String)
+    EWallet(String, String),
 }
 
 // method from enum
@@ -485,10 +508,16 @@ impl Payment {
                 println!("paying with credit card {} amount {}", number, amount)
             }
             Payment::BankTransfer(bank, number) => {
-                println!("paying with bank transfer {} {} amount {}", bank, number, amount)
+                println!(
+                    "paying with bank transfer {} {} amount {}",
+                    bank, number, amount
+                )
             }
             Payment::EWallet(wallet, number) => {
-                println!("paying with e-wallet {} {} amount {}", wallet, number, amount)
+                println!(
+                    "paying with e-wallet {} {} amount {}",
+                    wallet, number, amount
+                )
             }
         }
     }
@@ -513,16 +542,15 @@ fn test_pattern_matching_enum() {
     match level {
         Level::Regular => {
             println!("Regular")
-        },
+        }
         Level::Premium => {
             println!("Premium")
-        },
+        }
         Level::Platinum => {
             println!("Platinum")
-        },
+        }
     }
 }
-
 
 // pattern matching for value
 #[test]
@@ -545,7 +573,7 @@ fn test_match_value() {
 // multiple patterns
 #[test]
 fn test_multiple_patterns() {
-     let name = "suga";
+    let name = "suga";
 
     match name {
         "ray" | "sug" => {
@@ -563,7 +591,7 @@ fn test_range_patterns() {
     let value = 5;
 
     match value {
-        75..=100 =>  {
+        75..=100 => {
             println!("A")
         }
         50..=74 => {
@@ -601,12 +629,16 @@ fn test_destructuring_struct_patterns() {
     let person = Person {
         first_name: String::from("suga"),
         last_name: String::from("vermillion"),
-        age: 20
+        age: 20,
     };
 
     // .. is ignoring
     match person {
-        Person {first_name, last_name, ..} => {
+        Person {
+            first_name,
+            last_name,
+            ..
+        } => {
             println!("{} {}", first_name, last_name)
         }
     }
@@ -618,13 +650,11 @@ fn test_match_expression() {
     let value = 99;
 
     let result = match value {
-        0 => "nol", 
-        1 => "satu", 
-        2 => {
-            "dua"
-        },
+        0 => "nol",
+        1 => "satu",
+        2 => "dua",
         3 => "tiga",
-        _ => "invalid"
+        _ => "invalid",
     };
 
     println!("result: {}", result)
@@ -637,20 +667,57 @@ type IdentityNumber = String;
 struct Customer {
     id: IdentityNumber,
     name: String,
-    age: Age
+    age: Age,
 }
 
 type Pelanggan = Customer;
 
 #[test]
 fn test_type_alias() {
-    let customer = Customer{
+    let customer = Customer {
         id: String::from("123456789"),
         name: String::from("suga"),
-        age: 20
+        age: 20,
     };
 
     println!("id: {}", customer.id);
     println!("name: {}", customer.name);
     println!("age: {}", customer.age);
+}
+
+// module
+#[test]
+fn test_module() {
+    let user: model::User = model::User {
+        first_name: String::from("suga"),
+        last_name: String::from("vermillion"),
+        username: String::from("suga_username"),
+        email: String::from("suga@mahasibuk.com"),
+        age: 20,
+    };
+
+    user.say_hello("Raychellz");
+}
+
+// use keywords
+use first_inside::say_hello;
+use second_inside::say_hello as say_hello_second;
+
+#[test]
+fn test_use_keywords() {
+    // normally
+    // first::say_hello();
+    // second::say_hello();
+
+    // but if we use use keywords
+
+    say_hello();
+    say_hello_second();
+}
+
+// module outside
+#[test]
+fn test_module_outside() {
+    first::say_hello_outside();
+    second::say_hello_outside();
 }
