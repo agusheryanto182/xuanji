@@ -723,3 +723,39 @@ fn test_module_outside() {
     first::say_hello_outside();
     second::say_hello_outside();
 }
+
+// trait, it's looks like interface in golang (contract)
+trait can_say_hello {
+    fn hello(&self) -> String {
+        String::from("Hello bro")
+    }
+    fn say_hello(&self) -> String;
+    fn say_hello_to(&self, name: &str) -> String;
+}
+
+impl can_say_hello for Person {
+    fn say_hello(&self) -> String {
+        format!("Hello, my name is {} {}", self.first_name, self.last_name)
+    }
+    fn say_hello_to(&self, name: &str) -> String {
+        format!(
+            "Hello, my name is {} {} and I want to say hello to {}",
+            self.first_name, self.last_name, name
+        )
+    }
+}
+
+#[test]
+fn test_can_say_hello() {
+    let person = Person {
+        first_name: String::from("suga"),
+        last_name: String::from("vermillion"),
+        age: 20,
+    };
+
+    let message = person.say_hello_to("Raychellz");
+    println!("{}", message);
+
+    let hello = person.hello();
+    println!("{}", hello);
+}
