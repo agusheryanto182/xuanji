@@ -9,3 +9,12 @@ pub fn say_hello_outside() {
 fn test_say_hello_outside() {
     say_hello_outside();
 }
+
+pub mod second {
+    pub mod third {
+        pub fn say_hello_outside() {
+            // crate::first::say_hello_outside();
+            super::super::say_hello_outside();
+        }
+    }
+}

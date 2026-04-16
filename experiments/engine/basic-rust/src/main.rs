@@ -29,7 +29,8 @@ fn main() {
 
 #[test]
 fn hello_test() {
-    println!("Hello test!")
+    // println!("Hello test!")
+    first::second::third::say_hello_outside();
 }
 
 #[test]
