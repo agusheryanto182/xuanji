@@ -2,6 +2,7 @@
 mod first;
 mod model;
 mod second;
+mod third;
 
 mod first_inside {
     pub fn say_hello() {
