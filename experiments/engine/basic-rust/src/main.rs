@@ -809,3 +809,33 @@ fn test_trait() {
     println!("{}", person.goodbye());
     println!("{}", person.say_goodbye_to("Raychellz"));
 }
+
+struct SimplePerson {
+    name: String,
+}
+
+impl CanSayGoodbye for SimplePerson {
+    fn say_goodbye(&self) -> String {
+        format!(
+            "Goodbye returned from SimplePerson, my name is {}",
+            self.name
+        )
+    }
+    fn say_goodbye_to(&self, name: &str) -> String {
+        format!(
+            "Goodbye returned from SimplePerson, my name is {} and I want to say goodbye to {}",
+            self.name, name
+        )
+    }
+}
+
+fn create_person(name: String) -> impl CanSayGoodbye {
+    SimplePerson { name }
+}
+
+#[test]
+fn test_return_trait() {
+    let person = create_person(String::from("suga"));
+    println!("{}", person.say_goodbye());
+    println!("{}", person.say_goodbye_to("Raychellz"));
+}
