@@ -733,6 +733,14 @@ trait CanSayHello {
     fn say_hello_to(&self, name: &str) -> String;
 }
 
+trait CanSayGoodbye {
+    fn goodbye(&self) -> String {
+        String::from("Goodbye!")
+    }
+    fn say_goodbye(&self) -> String;
+    fn say_goodbye_to(&self, name: &str) -> String;
+}
+
 impl CanSayHello for Person {
     fn say_hello(&self) -> String {
         format!("Hello, my name is {} {}", self.first_name, self.last_name)
@@ -740,6 +748,18 @@ impl CanSayHello for Person {
     fn say_hello_to(&self, name: &str) -> String {
         format!(
             "Hello, my name is {} {} and I want to say hello to {}",
+            self.first_name, self.last_name, name
+        )
+    }
+}
+
+impl CanSayGoodbye for Person {
+    fn say_goodbye(&self) -> String {
+        format!("Goodbye, my name is {} {}", self.first_name, self.last_name)
+    }
+    fn say_goodbye_to(&self, name: &str) -> String {
+        format!(
+            "Goodbye, my name is {} {} and I want to say goodbye to {}",
             self.first_name, self.last_name, name
         )
     }
@@ -764,6 +784,11 @@ fn say_hello_trait(value: &impl CanSayHello) {
     println!("{}", value.say_hello())
 }
 
+fn hello_and_goodbye(value: &(impl CanSayHello + CanSayGoodbye)) {
+    println!("{}", value.say_hello());
+    println!("{}", value.goodbye());
+}
+
 #[test]
 fn test_trait() {
     let person = Person {
@@ -773,4 +798,14 @@ fn test_trait() {
     };
 
     say_hello_trait(&person);
+    hello_and_goodbye(&person);
+
+    let result = person.say_hello_to("Raychellz");
+    println!("{}", result);
+
+    let result = person.hello();
+    println!("{}", result);
+
+    println!("{}", person.goodbye());
+    println!("{}", person.say_goodbye_to("Raychellz"));
 }
