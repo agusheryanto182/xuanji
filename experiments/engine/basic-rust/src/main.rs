@@ -842,3 +842,48 @@ fn test_return_trait() {
     println!("{}", person.say_goodbye());
     println!("{}", person.say_goodbye_to("Raychellz"));
 }
+
+trait CanSay: CanSayHello + CanSayGoodbye {}
+
+struct SimpleMan {
+    name: String,
+}
+
+impl CanSayHello for SimpleMan {
+    fn say_hello(&self) -> String {
+        format!("Hello, my name is {}", self.name)
+    }
+    fn say_hello_to(&self, name: &str) -> String {
+        format!(
+            "Hello, my name is {} and I want to say hello to {}",
+            self.name, name
+        )
+    }
+}
+
+impl CanSayGoodbye for SimpleMan {
+    fn say_goodbye(&self) -> String {
+        format!(
+            "Goodbye returned from SimplePerson, my name is {}",
+            self.name
+        )
+    }
+    fn say_goodbye_to(&self, name: &str) -> String {
+        format!(
+            "Goodbye returned from SimplePerson, my name is {} and I want to say goodbye to {}",
+            self.name, name
+        )
+    }
+}
+
+impl CanSay for SimpleMan {}
+
+#[test]
+fn test_super_trait() {
+    let man = SimpleMan {
+        name: String::from("suga"),
+    };
+
+    let message = man.say_goodbye_to("Raychellz");
+    println!("{}", message);
+}
