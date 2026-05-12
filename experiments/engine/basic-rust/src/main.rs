@@ -808,6 +808,9 @@ fn test_trait() {
 
     println!("{}", person.goodbye());
     println!("{}", person.say_goodbye_to("Raychellz"));
+
+    CanSayHello::say_hello_to(&person, "Raychellz");
+    Person::say_hello(&person, "Raychellz");
 }
 
 struct SimplePerson {
