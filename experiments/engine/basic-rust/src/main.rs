@@ -887,3 +887,22 @@ fn test_super_trait() {
     let message = man.say_goodbye_to("Raychellz");
     println!("{}", message);
 }
+
+// Generic in struct
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+#[test]
+fn test_generic_struct() {
+    let integer: Point<i32> = Point { x: 1, y: 2 };
+
+    println!("x: {}", integer.x);
+    println!("y: {}", integer.y);
+
+    let float: Point<f64> = Point { x: 1.1, y: 2.2 };
+
+    println!("x: {}", float.x);
+    println!("y: {}", float.y);
+}
