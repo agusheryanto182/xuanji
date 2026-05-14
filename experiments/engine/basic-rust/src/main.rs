@@ -906,3 +906,24 @@ fn test_generic_struct() {
     println!("x: {}", float.x);
     println!("y: {}", float.y);
 }
+
+// Generic in enum
+enum Value<T> {
+    NONE,
+    VALUE(T),
+}
+
+#[test]
+fn test_generic_enum() {
+    let value: Value<i32> = Value::<i32>::VALUE(10);
+    match value {
+        Value::NONE => println!("NONE"),
+        Value::VALUE(value) => println!("value: {}", value),
+    }
+
+    let none: Value<i32> = Value::NONE;
+    match none {
+        Value::NONE => println!("NONE"),
+        Value::VALUE(value) => println!("value: {}", value),
+    }
+}
