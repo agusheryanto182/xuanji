@@ -9,9 +9,9 @@ import (
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/usecase/user"
 	"github.com/agusheryanto182/ecommerce-monolith/pkg/jwt"
+	gomock "github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 	"golang.org/x/crypto/bcrypt"
 )
 

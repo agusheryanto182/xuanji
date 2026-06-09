@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/agusheryanto182/ecommerce-monolith/config"
+	_ "github.com/agusheryanto182/ecommerce-monolith/docs"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/app"
 )
 

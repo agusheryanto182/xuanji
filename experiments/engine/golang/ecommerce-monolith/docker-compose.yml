@@ -1,8 +1,8 @@
 x-db-environment: &x-db-environment
   POSTGRES_SSL_MODE: "disable"
-  POSTGRES_HOST: "db"
+  POSTGRES_HOST: "ecommerce_monolith_db"
   POSTGRES_PORT: "5432"
-  POSTGRES_DB: "db"
+  POSTGRES_DB: "ecommerce_monolith_db"
   POSTGRES_PASSWORD: "myAwEsOm3pa55@w0rd"
   POSTGRES_USER: "user"
 
@@ -18,7 +18,7 @@ x-backend-app-environment: &x-backend-app-environment
   LOG_LEVEL: "debug"
   # PG
   PG_POOL_MAX: "2"
-  PG_URL: "postgres://user:myAwEsOm3pa55@w0rd@db:5432/db"
+  PG_URL: "postgres://user:myAwEsOm3pa55@w0rd@localhost:5432/ecommerce_monolith_db"
   # Metrics
   METRICS_ENABLED: "true"
   # Swagger
@@ -28,8 +28,8 @@ x-backend-app-environment: &x-backend-app-environment
   JWT_SECRET: "your-secret-key-change-in-production"
 
 services:
-  db:
-    container_name: db
+  ecommerce_monolith_db:
+    container_name: ecommerce_monolith_db
     image: postgres:18.4-alpine
     environment:
       <<: *x-db-environment
@@ -54,7 +54,7 @@ services:
       - "8080:8080"
       - "8081:8081"
     depends_on:
-      - db
+      - ecommerce_monolith_db
     deploy:
       resources:
         limits:
