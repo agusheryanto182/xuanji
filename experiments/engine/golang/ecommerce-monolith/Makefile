@@ -62,6 +62,10 @@ run: deps swag-v1 ### run app
 	CGO_ENABLED=0 go run -tags migrate ./cmd/app
 .PHONY: run
 
+seed: ### seed data
+	go run ./cmd/seed
+.PHONY: seed
+
 docker-rm-volume: ### remove docker volume
 	docker volume rm go-clean-template_pg-data
 .PHONY: docker-rm-volume
