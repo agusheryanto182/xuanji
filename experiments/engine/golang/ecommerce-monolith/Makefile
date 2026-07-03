@@ -103,6 +103,14 @@ migrate-up: ### migration up
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
 
+migrate-down:
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down
+.PHONY: migrate-down
+
+migrate-down-step:
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down $(STEP)
+.PHONY: migrate-down-step
+
 bin-deps: ### install tools
 	go install tool
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
