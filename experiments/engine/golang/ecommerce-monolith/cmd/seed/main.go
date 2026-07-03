@@ -5,7 +5,7 @@ import (
 
 	"github.com/agusheryanto182/ecommerce-monolith/config"
 	_ "github.com/agusheryanto182/ecommerce-monolith/docs"
-	"github.com/agusheryanto182/ecommerce-monolith/internal/seeder"
+	"github.com/agusheryanto182/ecommerce-monolith/internal/seed"
 )
 
 func main() {
@@ -16,5 +16,5 @@ func main() {
 	}
 
 	// Run
-	seeder.Run(cfg)
+	seed.Run(cfg)
 }
