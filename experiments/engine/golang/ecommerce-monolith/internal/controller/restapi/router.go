@@ -25,7 +25,7 @@ import (
 //	@securityDefinitions.apikey BearerAuth
 //	@in header
 //	@name Authorization
-func NewRouter(app *fiber.App, cfg *config.Config, u usecase.User, jwtManager *jwt.Manager, l logger.Interface) {
+func NewRouter(app *fiber.App, cfg *config.Config, u usecase.User, p usecase.Product, jwtManager *jwt.Manager, l logger.Interface) {
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
@@ -48,6 +48,6 @@ func NewRouter(app *fiber.App, cfg *config.Config, u usecase.User, jwtManager *j
 	// Routers
 	apiV1Group := app.Group("/v1")
 	{
-		v1.NewRoutes(apiV1Group, u, jwtManager, l)
+		v1.NewRoutes(apiV1Group, u, p, jwtManager, l)
 	}
 }

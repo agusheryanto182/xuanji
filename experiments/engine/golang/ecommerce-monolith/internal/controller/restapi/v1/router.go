@@ -10,8 +10,8 @@ import (
 )
 
 // NewRoutes -.
-func NewRoutes(apiV1Group fiber.Router, u usecase.User, jwtManager *jwt.Manager, l logger.Interface) {
-	r := &V1{u: u, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
+func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtManager *jwt.Manager, l logger.Interface) {
+	r := &V1{u: u, p: p, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
 
 	// Public routes
 	authGroup := apiV1Group.Group("/auth")
@@ -26,5 +26,10 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, jwtManager *jwt.Manager,
 	userGroup := protected.Group("/user")
 	{
 		userGroup.Get("/profile", r.profile)
+	}
+
+	productGroup := protected.Group("/product")
+	{
+		productGroup.Post("", r.Store)
 	}
 }
