@@ -7,6 +7,7 @@ import (
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/usecase/product"
 	gomock "github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -72,5 +73,51 @@ func TestStore(t *testing.T) {
 		})
 
 		require.ErrorIs(t, err, entity.ErrInvalidProductCreate)
+	})
+}
+
+func TestGetByID(t *testing.T) {
+	productID := uuid.New()
+	t.Parallel()
+
+	t.Run("get by id success", func(t *testing.T) {
+		t.Parallel()
+
+		uc, repo, _ := newProductUseCase(t)
+
+		repo.EXPECT().
+			GetByID(context.Background(), productID).
+			Return(&entity.Product{
+				Name:        "Test Product",
+				Description: "This is a test product",
+				Price:       999.99,
+				Stock:       10,
+			}, nil)
+
+		p, err := uc.GetByID(context.Background(), productID)
+
+		require.NoError(t, err)
+		assert.Equal(t, "Test Product", p.Name)
+		assert.Equal(t, "This is a test product", p.Description)
+		assert.Equal(t, 999.99, p.Price)
+		assert.Equal(t, 10, p.Stock)
+	})
+
+	t.Run("get by id failed", func(t *testing.T) {
+		t.Parallel()
+
+		uc, repo, logger := newProductUseCase(t)
+
+		logger.EXPECT().
+			Error(gomock.Any()).
+			Times(1)
+
+		repo.EXPECT().
+			GetByID(context.Background(), productID).
+			Return(nil, entity.ErrInvalidIdProduct)
+
+		_, err := uc.GetByID(context.Background(), productID)
+
+		require.ErrorIs(t, err, entity.ErrInvalidIdProduct)
 	})
 }
