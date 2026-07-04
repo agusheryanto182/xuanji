@@ -117,19 +117,19 @@ func (mr *MockProductRepoMockRecorder) Delete(ctx, id interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepo)(nil).Delete), ctx, id)
 }
 
-// GetProduct mocks base method.
-func (m *MockProductRepo) GetProduct(ctx context.Context, column, value string) (entity.Product, error) {
+// GetByID mocks base method.
+func (m *MockProductRepo) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProduct", ctx, column, value)
-	ret0, _ := ret[0].(entity.Product)
+	ret := m.ctrl.Call(m, "GetByID", ctx, ID)
+	ret0, _ := ret[0].(*entity.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetProduct indicates an expected call of GetProduct.
-func (mr *MockProductRepoMockRecorder) GetProduct(ctx, column, value interface{}) *gomock.Call {
+// GetByID indicates an expected call of GetByID.
+func (mr *MockProductRepoMockRecorder) GetByID(ctx, ID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProduct", reflect.TypeOf((*MockProductRepo)(nil).GetProduct), ctx, column, value)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProductRepo)(nil).GetByID), ctx, ID)
 }
 
 // PartialUpdate mocks base method.

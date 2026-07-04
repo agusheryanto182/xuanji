@@ -6,6 +6,7 @@ import (
 
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/usecase/product"
+	"github.com/google/uuid"
 )
 
 //go:generate mockgen -source=contracts.go -destination=./mocks_usecase_test.go -package=usecase_test
@@ -21,7 +22,7 @@ type (
 	// Product -.
 	Product interface {
 		Store(ctx context.Context, product *entity.Product) (*entity.Product, error)
-		GetProduct(ctx context.Context, column, value string) (*entity.Product, error)
+		GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) (*entity.Product, error)
 		UpdatePartial(ctx context.Context, input product.UpdatePartialProductInput) (*entity.Product, error)
 		Delete(ctx context.Context, id string) error

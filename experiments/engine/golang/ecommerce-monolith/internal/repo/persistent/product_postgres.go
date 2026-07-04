@@ -37,15 +37,15 @@ func (r *ProductRepo) Store(ctx context.Context, product *entity.Product) error 
 	return nil
 }
 
-// GetProduct
-func (r *ProductRepo) GetProduct(ctx context.Context, column, value string) (entity.Product, error) {
+// Get By ID
+func (r *ProductRepo) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
 	sql, args, err := r.Builder.
 		Select("id, name, description, price, stock, created_at, updated_at").
 		From("products").
-		Where(sq.Eq{column: value}).
+		Where(sq.Eq{"id": ID}).
 		ToSql()
 	if err != nil {
-		return entity.Product{}, err
+		return nil, err
 	}
 
 	var product entity.Product
@@ -59,10 +59,10 @@ func (r *ProductRepo) GetProduct(ctx context.Context, column, value string) (ent
 		&product.UpdatedAt,
 	)
 	if err != nil {
-		return entity.Product{}, err
+		return nil, err
 	}
 
-	return product, nil
+	return &product, nil
 }
 
 // Full Update -.

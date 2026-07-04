@@ -41,15 +41,9 @@ func (uc *UseCase) Store(ctx context.Context, product *entity.Product) (*entity.
 	return product, nil
 }
 
-// GetProduct -.
-func (uc *UseCase) GetProduct(ctx context.Context, column, value string) (*entity.Product, error) {
-	product, err := uc.repo.GetProduct(ctx, column, value)
-	if err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - GetProduct - uc.repo.GetProduct: %w", err))
-		return nil, entity.ErrProductNotFound
-	}
-
-	return &product, nil
+// GetProductByID -.
+func (uc *UseCase) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
+	return uc.repo.GetByID(ctx, ID)
 }
 
 // Update -.
@@ -102,7 +96,7 @@ func (uc *UseCase) UpdatePartial(ctx context.Context, input UpdatePartialProduct
 		return nil, entity.ErrInvalidProductPartialUpdate
 	}
 
-	product, err := uc.GetProduct(ctx, "id", input.ID.String())
+	product, err := uc.repo.GetByID(ctx, input.ID)
 	if err != nil {
 		uc.l.Error(fmt.Errorf("ProductUseCase - UpdatePartial - uc.GetProduct: %w", err))
 		return nil, entity.ErrProductNotFound
