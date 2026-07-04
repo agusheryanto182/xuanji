@@ -20,9 +20,9 @@ type (
 
 	// Product -.
 	Product interface {
-		Store(ctx context.Context, input product.CreateProductInput) (*entity.Product, error)
+		Store(ctx context.Context, product *entity.Product) (*entity.Product, error)
 		GetProduct(ctx context.Context, column, value string) (*entity.Product, error)
-		Update(ctx context.Context, input product.UpdateProductInput) (*entity.Product, error)
+		Update(ctx context.Context, product *entity.Product) (*entity.Product, error)
 		UpdatePartial(ctx context.Context, input product.UpdatePartialProductInput) (*entity.Product, error)
 		Delete(ctx context.Context, id string) error
 	}

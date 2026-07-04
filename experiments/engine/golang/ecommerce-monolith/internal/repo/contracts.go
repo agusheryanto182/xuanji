@@ -22,8 +22,6 @@ type (
 	ProductRepo interface {
 		Store(ctx context.Context, product *entity.Product) error
 		GetProduct(ctx context.Context, column, value string) (entity.Product, error)
-		GetByID(ctx context.Context, id string) (entity.Product, error)
-		GetByName(ctx context.Context, name string) (entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) error
 		PartialUpdate(ctx context.Context, id uuid.UUID, updates map[string]any) error
 		Delete(ctx context.Context, id string) error

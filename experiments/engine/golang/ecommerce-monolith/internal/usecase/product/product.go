@@ -26,19 +26,19 @@ func New(r repo.ProductRepo, l logger.Interface) *UseCase {
 }
 
 // Store -.
-func (uc *UseCase) Store(ctx context.Context, product entity.Product) (*entity.Product, error) {
+func (uc *UseCase) Store(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	now := time.Now().UTC()
 
 	product.ID = uuid.New()
 	product.CreatedAt = now
 	product.UpdatedAt = now
 
-	if err := uc.repo.Store(ctx, &product); err != nil {
+	if err := uc.repo.Store(ctx, product); err != nil {
 		uc.l.Error(fmt.Errorf("ProductUseCase - Store - uc.repo.Store: %w", err))
 		return nil, entity.ErrInvalidProductCreate
 	}
 
-	return &product, nil
+	return product, nil
 }
 
 // GetProduct -.
@@ -53,7 +53,7 @@ func (uc *UseCase) GetProduct(ctx context.Context, column, value string) (*entit
 }
 
 // Update -.
-func (uc *UseCase) Update(ctx context.Context, product entity.Product) (*entity.Product, error) {
+func (uc *UseCase) Update(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	if product.ID == uuid.Nil {
 		uc.l.Error(fmt.Errorf("ProductUseCase - Update - product.ID is nil"))
 		return nil, entity.ErrInvalidIdProduct
@@ -61,12 +61,12 @@ func (uc *UseCase) Update(ctx context.Context, product entity.Product) (*entity.
 
 	product.UpdatedAt = time.Now().UTC()
 
-	if err := uc.repo.Update(ctx, &product); err != nil {
+	if err := uc.repo.Update(ctx, product); err != nil {
 		uc.l.Error(fmt.Errorf("ProductUseCase - Update - uc.repo.Update: %w", err))
 		return nil, entity.ErrInvalidProductUpdate
 	}
 
-	return &product, nil
+	return product, nil
 }
 
 // UpdatePartial -.
