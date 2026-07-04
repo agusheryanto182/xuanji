@@ -62,6 +62,11 @@ run: deps swag-v1 ### run app
 	CGO_ENABLED=0 go run -tags migrate ./cmd/app
 .PHONY: run
 
+air: deps swag-v1 ### run app with Air
+	go mod download && \
+	air -c .air.toml
+.PHONY: air
+
 seed: ### seed data
 	go run ./cmd/seed
 .PHONY: seed

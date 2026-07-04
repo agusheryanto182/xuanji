@@ -8,7 +8,7 @@ tmp_dir = "tmp"
   cmd = "go build -o ./tmp/main ./cmd/app"
   bin = "./tmp/main"
 
-  include_ext = ["go", "yaml", "yml", "toml", "env"]
+  include_ext = ["go", "yaml", "yml", "toml", "env", "json"]
   exclude_dir = ["tmp", "vendor", ".git", "testdata"]
 
   exclude_regex = ["_test.go"]
