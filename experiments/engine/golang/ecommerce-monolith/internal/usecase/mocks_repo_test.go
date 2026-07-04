@@ -117,36 +117,6 @@ func (mr *MockProductRepoMockRecorder) Delete(ctx, id interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepo)(nil).Delete), ctx, id)
 }
 
-// GetByID mocks base method.
-func (m *MockProductRepo) GetByID(ctx context.Context, id string) (entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetByID indicates an expected call of GetByID.
-func (mr *MockProductRepoMockRecorder) GetByID(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProductRepo)(nil).GetByID), ctx, id)
-}
-
-// GetByName mocks base method.
-func (m *MockProductRepo) GetByName(ctx context.Context, name string) (entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByName", ctx, name)
-	ret0, _ := ret[0].(entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetByName indicates an expected call of GetByName.
-func (mr *MockProductRepoMockRecorder) GetByName(ctx, name interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockProductRepo)(nil).GetByName), ctx, name)
-}
-
 // GetProduct mocks base method.
 func (m *MockProductRepo) GetProduct(ctx context.Context, column, value string) (entity.Product, error) {
 	m.ctrl.T.Helper()

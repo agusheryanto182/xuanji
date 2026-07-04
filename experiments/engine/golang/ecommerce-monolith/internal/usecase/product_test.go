@@ -32,12 +32,16 @@ func TestStore(t *testing.T) {
 		uc, repo, _ := newProductUseCase(t)
 		repo.EXPECT().Store(context.Background(), gomock.Any()).Return(nil)
 
-		p, err := uc.Store(context.Background(), entity.Product{
+		p, err := uc.Store(context.Background(), &entity.Product{
 			Name:        "Test Product",
 			Description: "This is a test product",
 			Price:       99.99,
 			Stock:       10,
 		})
+
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
 
 		require.NoError(t, err)
 		assert.NotEmpty(t, p.ID)
@@ -60,7 +64,7 @@ func TestStore(t *testing.T) {
 			Store(gomock.Any(), gomock.Any()).
 			Return(entity.ErrInvalidProductCreate)
 
-		_, err := uc.Store(context.Background(), entity.Product{
+		_, err := uc.Store(context.Background(), &entity.Product{
 			Name:        "Test Product",
 			Description: "This is a test product",
 			Price:       999,

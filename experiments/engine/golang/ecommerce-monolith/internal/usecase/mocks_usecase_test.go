@@ -134,33 +134,33 @@ func (mr *MockProductMockRecorder) GetProduct(ctx, column, value interface{}) *g
 }
 
 // Store mocks base method.
-func (m *MockProduct) Store(ctx context.Context, input product.CreateProductInput) (*entity.Product, error) {
+func (m *MockProduct) Store(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", ctx, input)
+	ret := m.ctrl.Call(m, "Store", ctx, product)
 	ret0, _ := ret[0].(*entity.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Store indicates an expected call of Store.
-func (mr *MockProductMockRecorder) Store(ctx, input interface{}) *gomock.Call {
+func (mr *MockProductMockRecorder) Store(ctx, product interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockProduct)(nil).Store), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockProduct)(nil).Store), ctx, product)
 }
 
 // Update mocks base method.
-func (m *MockProduct) Update(ctx context.Context, input product.UpdateProductInput) (*entity.Product, error) {
+func (m *MockProduct) Update(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, input)
+	ret := m.ctrl.Call(m, "Update", ctx, product)
 	ret0, _ := ret[0].(*entity.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockProductMockRecorder) Update(ctx, input interface{}) *gomock.Call {
+func (mr *MockProductMockRecorder) Update(ctx, product interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProduct)(nil).Update), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProduct)(nil).Update), ctx, product)
 }
 
 // UpdatePartial mocks base method.
