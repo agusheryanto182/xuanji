@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
+	"github.com/google/uuid"
 )
 
 //go:generate mockgen -source=contracts.go -destination=../usecase/mocks_repo_test.go -package=usecase_test
@@ -15,5 +16,16 @@ type (
 		Store(ctx context.Context, user *entity.User) error
 		GetByID(ctx context.Context, id string) (entity.User, error)
 		GetByEmail(ctx context.Context, email string) (entity.User, error)
+	}
+
+	// ProductRepo -.
+	ProductRepo interface {
+		Store(ctx context.Context, product *entity.Product) error
+		GetProduct(ctx context.Context, column, value string) (entity.Product, error)
+		GetByID(ctx context.Context, id string) (entity.Product, error)
+		GetByName(ctx context.Context, name string) (entity.Product, error)
+		Update(ctx context.Context, product *entity.Product) error
+		PartialUpdate(ctx context.Context, id uuid.UUID, updates map[string]any) error
+		Delete(ctx context.Context, id string) error
 	}
 )

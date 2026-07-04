@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
 	"github.com/agusheryanto182/ecommerce-monolith/pkg/postgres"
+	"github.com/google/uuid"
 )
 
 type ProductRepo struct {
@@ -64,17 +65,7 @@ func (r *ProductRepo) GetProduct(ctx context.Context, column, value string) (ent
 	return product, nil
 }
 
-// GetByID -.
-func (r *ProductRepo) GetByID(ctx context.Context, id string) (entity.Product, error) {
-	return r.GetProduct(ctx, "id", id)
-}
-
-// GetByName -.
-func (r *ProductRepo) GetByName(ctx context.Context, name string) (entity.Product, error) {
-	return r.GetProduct(ctx, "name", name)
-}
-
-// Update -.
+// Full Update -.
 func (r *ProductRepo) Update(ctx context.Context, product *entity.Product) error {
 	sql, args, err := r.Builder.
 		Update("products").
@@ -94,6 +85,28 @@ func (r *ProductRepo) Update(ctx context.Context, product *entity.Product) error
 		return err
 	}
 
+	return nil
+}
+
+// Partial Update -.
+func (r *ProductRepo) PartialUpdate(ctx context.Context, id uuid.UUID, updates map[string]any) error {
+	sql := r.Builder.Update("products")
+
+	for column, value := range updates {
+		sql = sql.Set(column, value)
+	}
+
+	sql = sql.Where(sq.Eq{"id": id})
+
+	sqlStr, args, err := sql.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.Pool.Exec(ctx, sqlStr, args...)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -1,10 +1,14 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // Product -.
 type Product struct {
-	ID          string    `json:"id"          example:"550e8400-e29b-41d4-a716-446655440000"`
+	ID          uuid.UUID `json:"id"          example:"550e8400-e29b-41d4-a716-446655440000"`
 	Name        string    `json:"name"        example:"Product Name"`
 	Description string    `json:"description" example:"Product Description"`
 	Price       float64   `json:"price"       example:"19.99"`
