@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	entity "github.com/agusheryanto182/ecommerce-monolith/internal/entity"
+	product "github.com/agusheryanto182/ecommerce-monolith/internal/usecase/product"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -78,4 +79,101 @@ func (m *MockUser) Register(ctx context.Context, username, email, password strin
 func (mr *MockUserMockRecorder) Register(ctx, username, email, password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockUser)(nil).Register), ctx, username, email, password)
+}
+
+// MockProduct is a mock of Product interface.
+type MockProduct struct {
+	ctrl     *gomock.Controller
+	recorder *MockProductMockRecorder
+}
+
+// MockProductMockRecorder is the mock recorder for MockProduct.
+type MockProductMockRecorder struct {
+	mock *MockProduct
+}
+
+// NewMockProduct creates a new mock instance.
+func NewMockProduct(ctrl *gomock.Controller) *MockProduct {
+	mock := &MockProduct{ctrl: ctrl}
+	mock.recorder = &MockProductMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockProduct) EXPECT() *MockProductMockRecorder {
+	return m.recorder
+}
+
+// Delete mocks base method.
+func (m *MockProduct) Delete(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockProductMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProduct)(nil).Delete), ctx, id)
+}
+
+// GetProduct mocks base method.
+func (m *MockProduct) GetProduct(ctx context.Context, column, value string) (*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProduct", ctx, column, value)
+	ret0, _ := ret[0].(*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProduct indicates an expected call of GetProduct.
+func (mr *MockProductMockRecorder) GetProduct(ctx, column, value interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProduct", reflect.TypeOf((*MockProduct)(nil).GetProduct), ctx, column, value)
+}
+
+// Store mocks base method.
+func (m *MockProduct) Store(ctx context.Context, input product.CreateProductInput) (*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Store", ctx, input)
+	ret0, _ := ret[0].(*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Store indicates an expected call of Store.
+func (mr *MockProductMockRecorder) Store(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockProduct)(nil).Store), ctx, input)
+}
+
+// Update mocks base method.
+func (m *MockProduct) Update(ctx context.Context, input product.UpdateProductInput) (*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, input)
+	ret0, _ := ret[0].(*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockProductMockRecorder) Update(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProduct)(nil).Update), ctx, input)
+}
+
+// UpdatePartial mocks base method.
+func (m *MockProduct) UpdatePartial(ctx context.Context, input product.UpdatePartialProductInput) (*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePartial", ctx, input)
+	ret0, _ := ret[0].(*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdatePartial indicates an expected call of UpdatePartial.
+func (mr *MockProductMockRecorder) UpdatePartial(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePartial", reflect.TypeOf((*MockProduct)(nil).UpdatePartial), ctx, input)
 }
