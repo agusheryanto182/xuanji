@@ -121,3 +121,58 @@ func TestGetByID(t *testing.T) {
 		require.ErrorIs(t, err, entity.ErrInvalidIdProduct)
 	})
 }
+
+func TestUpdate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("full update success", func(t *testing.T) {
+		t.Parallel()
+
+		uc, repo, _ := newProductUseCase(t)
+
+		repo.EXPECT().Update(context.Background(), gomock.Any()).Return(nil)
+
+		updated, err := uc.Update(context.Background(), &entity.Product{
+			ID:          uuid.New(),
+			Name:        "Test Product Update",
+			Description: "This is a test product update",
+			Price:       999.98,
+			Stock:       18,
+		})
+
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+
+		require.NoError(t, err)
+		assert.Equal(t, "Test Product Update", updated.Name)
+		assert.Equal(t, "This is a test product update", updated.Description)
+		assert.Equal(t, 999.98, updated.Price)
+		assert.Equal(t, 18, updated.Stock)
+	})
+
+	t.Run("error - product not found", func(t *testing.T) {
+		t.Parallel()
+
+		uc, repo, logger := newProductUseCase(t)
+		expectedError := entity.ErrProductNotFound
+
+		logger.EXPECT().
+			Error(gomock.Any()).
+			Times(1)
+
+		repo.EXPECT().Update(context.Background(), gomock.Any()).Return(expectedError)
+
+		updated, err := uc.Update(context.Background(), &entity.Product{
+			ID:          uuid.New(),
+			Name:        "Test Product Update",
+			Description: "This is a test product update",
+			Price:       999.98,
+			Stock:       18,
+		})
+
+		require.Error(t, err)
+		assert.ErrorIs(t, err, entity.ErrInvalidProductUpdate)
+		assert.Nil(t, updated)
+	})
+}
