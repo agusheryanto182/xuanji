@@ -65,16 +65,15 @@ func (uc *UseCase) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, 
 
 // Update -.
 func (uc *UseCase) Update(ctx context.Context, product *entity.Product) (*entity.Product, error) {
-	if product.ID == uuid.Nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - Update - product.ID is nil"))
-		return nil, entity.ErrInvalidIdProduct
-	}
-
 	product.UpdatedAt = time.Now().UTC()
 
 	if err := uc.repo.Update(ctx, product); err != nil {
+		if errors.Is(err, entity.ErrProductNotFound) {
+			return nil, err
+		}
+
 		uc.l.Error(fmt.Errorf("ProductUseCase - Update - uc.repo.Update: %w", err))
-		return nil, entity.ErrInvalidProductUpdate
+		return nil, entity.ErrInternalServerError
 	}
 
 	return product, nil

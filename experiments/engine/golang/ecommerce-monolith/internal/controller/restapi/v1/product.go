@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/agusheryanto182/ecommerce-monolith/internal/controller/restapi/v1/request"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
@@ -23,13 +22,9 @@ func (r *V1) Store(ctx *fiber.Ctx) error {
 		Stock:       body.Stock,
 	}
 
-	fmt.Printf("%#v\n", r.p)
-
 	result, err := r.p.Store(ctx.UserContext(), product)
 	if err != nil {
-		r.l.Error(err, "restapi - v1 - Store")
-
-		return errorResponse(ctx, 500, "internal server error")
+		return errorResponse(ctx, 500, entity.ErrInternalServerError.Error())
 	}
 
 	return ctx.Status(201).JSON(result)
@@ -37,7 +32,6 @@ func (r *V1) Store(ctx *fiber.Ctx) error {
 
 func (r *V1) GetByID(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
-
 	if err != nil {
 		return errorResponse(ctx, 400, err.Error())
 	}
@@ -57,13 +51,37 @@ func (r *V1) GetByID(ctx *fiber.Ctx) error {
 }
 
 func (r *V1) Update(ctx *fiber.Ctx) error {
-	var id = ctx.Params("id")
-
-	if id == "" {
-		return errorResponse(ctx, 400, entity.ErrorInvalidRequestBody.Error())
+	productID, err := parseUUIDParam(ctx, "id")
+	if err != nil {
+		return errorResponse(ctx, 400, err.Error())
 	}
 
-	return nil
+	var body request.Update
+
+	if err := r.bindAndValidate(ctx, &body); err != nil {
+		return errorResponse(ctx, 400, err.Error())
+	}
+
+	product := &entity.Product{
+		ID:          productID,
+		Name:        body.Name,
+		Description: body.Description,
+		Price:       body.Price,
+		Stock:       body.Stock,
+	}
+
+	result, err := r.p.Update(ctx.UserContext(), product)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrProductNotFound):
+			return errorResponse(ctx, 404, err.Error())
+
+		default:
+			return errorResponse(ctx, 500, entity.ErrInternalServerError.Error())
+		}
+	}
+
+	return ctx.Status(200).JSON(result)
 }
 
 func (r *V1) UpdatePartial(ctx *fiber.Ctx) error {
