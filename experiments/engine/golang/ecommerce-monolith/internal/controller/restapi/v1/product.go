@@ -1,12 +1,12 @@
 package v1
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/agusheryanto182/ecommerce-monolith/internal/controller/restapi/v1/request"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 func (r *V1) Store(ctx *fiber.Ctx) error {
@@ -44,28 +44,33 @@ func (r *V1) Store(ctx *fiber.Ctx) error {
 }
 
 func (r *V1) GetByID(ctx *fiber.Ctx) error {
-	var id = ctx.Params("id")
+	productID, err := parseUUIDParam(ctx, "id")
 
-	if id == "" {
-		return errorResponse(ctx, 400, "invalid request body")
-	}
-
-	productID, err := uuid.Parse(id)
 	if err != nil {
-		return errorResponse(ctx, 400, "invalid request body")
+		return errorResponse(ctx, 400, err.Error())
 	}
 
 	product, err := r.p.GetByID(ctx.UserContext(), productID)
 	if err != nil {
-		r.l.Error(err, "restapi - v1 - Get")
+		switch {
+		case errors.Is(err, entity.ErrProductNotFound):
+			return errorResponse(ctx, 404, err.Error())
 
-		return errorResponse(ctx, 500, "internal server error")
+		default:
+			return errorResponse(ctx, 500, entity.ErrInternalServerError.Error())
+		}
 	}
 
 	return ctx.Status(200).JSON(product)
 }
 
 func (r *V1) Update(ctx *fiber.Ctx) error {
+	var id = ctx.Params("id")
+
+	if id == "" {
+		return errorResponse(ctx, 400, "invalid request body")
+	}
+
 	return nil
 }
 

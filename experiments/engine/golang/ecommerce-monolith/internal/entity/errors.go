@@ -17,4 +17,6 @@ var (
 	ErrInvalidProductUpdate        = errors.New("invalid product update")
 	ErrInvalidProductDelete        = errors.New("invalid product delete")
 	ErrInvalidProductPartialUpdate = errors.New("invalid product partial update")
+
+	ErrInternalServerError = errors.New("internal server error")
 )

@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/agusheryanto182/ecommerce-monolith/internal/repo"
 	"github.com/agusheryanto182/ecommerce-monolith/pkg/logger"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 // UseCase -.
@@ -45,8 +47,17 @@ func (uc *UseCase) Store(ctx context.Context, product *entity.Product) (*entity.
 func (uc *UseCase) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
 	product, err := uc.repo.GetByID(ctx, ID)
 	if err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - GetByID - uc.repo.GetByID: %w", err))
-		return nil, entity.ErrInvalidIdProduct
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, entity.ErrProductNotFound
+		}
+
+		uc.l.Error(fmt.Errorf(
+			"ProductUseCase.GetByID(id=%s): %w",
+			ID,
+			err,
+		))
+
+		return nil, entity.ErrInternalServerError
 	}
 
 	return product, nil
