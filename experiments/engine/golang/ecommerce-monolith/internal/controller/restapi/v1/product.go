@@ -12,16 +12,8 @@ import (
 func (r *V1) Store(ctx *fiber.Ctx) error {
 	var body request.Store
 
-	if err := ctx.BodyParser(&body); err != nil {
-		r.l.Error(err, "restapi - v1 - Store Body Parser")
-
-		return errorResponse(ctx, 400, "invalid request body")
-	}
-
-	if err := r.v.Struct(body); err != nil {
-		r.l.Error(err, "restapi - v1 - Store Validation")
-
-		return errorResponse(ctx, 400, "invalid request body")
+	if err := r.bindAndValidate(ctx, &body); err != nil {
+		return errorResponse(ctx, 400, err.Error())
 	}
 
 	product := &entity.Product{
@@ -68,7 +60,7 @@ func (r *V1) Update(ctx *fiber.Ctx) error {
 	var id = ctx.Params("id")
 
 	if id == "" {
-		return errorResponse(ctx, 400, "invalid request body")
+		return errorResponse(ctx, 400, entity.ErrorInvalidRequestBody.Error())
 	}
 
 	return nil

@@ -18,5 +18,6 @@ var (
 	ErrInvalidProductDelete        = errors.New("invalid product delete")
 	ErrInvalidProductPartialUpdate = errors.New("invalid product partial update")
 
-	ErrInternalServerError = errors.New("internal server error")
+	ErrInternalServerError  = errors.New("internal server error")
+	ErrorInvalidRequestBody = errors.New("invalid request body")
 )
