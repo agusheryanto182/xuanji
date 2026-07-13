@@ -8,7 +8,7 @@ type Store struct {
 	Stock       int     `json:"stock"       validate:"required,gt=0"            example:"10"`
 } // @name v1.Store
 
-// Full Update
+// Update
 type Update struct {
 	Name        string  `json:"name"        validate:"omitempty,min=3,max=255" example:"Product Name"`
 	Description string  `json:"description" validate:"omitempty,min=10"         example:"Product Description"`
@@ -16,7 +16,7 @@ type Update struct {
 	Stock       int     `json:"stock"       validate:"omitempty,gt=0"            example:"10"`
 }
 
-// Partial Update
+// Patch
 type Patch struct {
 	Name        *string  `json:"name"        validate:"omitempty,min=3,max=255" example:"Product Name"`
 	Description *string  `json:"description" validate:"omitempty,min=10"         example:"Product Description"`
