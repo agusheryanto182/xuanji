@@ -102,14 +102,14 @@ func (uc *UseCase) Patch(ctx context.Context, input PatchInput) (*entity.Product
 
 	if len(updatedFields) == 0 {
 		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - no fields to update"))
-		return nil, entity.ErrInvalidProductPartialUpdate
+		return nil, entity.ErrInvalidProductPatch
 	}
 
 	updatedFields["updated_at"] = time.Now().UTC()
 
-	if err := uc.repo.PartialUpdate(ctx, input.ID, updatedFields); err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - uc.repo.PartialUpdate: %w", err))
-		return nil, entity.ErrInvalidProductPartialUpdate
+	if err := uc.repo.Patch(ctx, input.ID, updatedFields); err != nil {
+		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - uc.repo.Patch: %w", err))
+		return nil, entity.ErrInvalidProductPatch
 	}
 
 	product, err := uc.repo.GetByID(ctx, input.ID)

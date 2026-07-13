@@ -93,7 +93,7 @@ func (r *ProductRepo) Update(ctx context.Context, product *entity.Product) error
 }
 
 // Partial Update -.
-func (r *ProductRepo) PartialUpdate(ctx context.Context, id uuid.UUID, updates map[string]any) error {
+func (r *ProductRepo) Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error {
 	sql := r.Builder.Update("products")
 
 	for column, value := range updates {

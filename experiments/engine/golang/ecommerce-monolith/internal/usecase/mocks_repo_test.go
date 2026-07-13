@@ -132,18 +132,18 @@ func (mr *MockProductRepoMockRecorder) GetByID(ctx, ID interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProductRepo)(nil).GetByID), ctx, ID)
 }
 
-// PartialUpdate mocks base method.
-func (m *MockProductRepo) PartialUpdate(ctx context.Context, id uuid.UUID, updates map[string]any) error {
+// Patch mocks base method.
+func (m *MockProductRepo) Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PartialUpdate", ctx, id, updates)
+	ret := m.ctrl.Call(m, "Patch", ctx, id, updates)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// PartialUpdate indicates an expected call of PartialUpdate.
-func (mr *MockProductRepoMockRecorder) PartialUpdate(ctx, id, updates interface{}) *gomock.Call {
+// Patch indicates an expected call of Patch.
+func (mr *MockProductRepoMockRecorder) Patch(ctx, id, updates interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PartialUpdate", reflect.TypeOf((*MockProductRepo)(nil).PartialUpdate), ctx, id, updates)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockProductRepo)(nil).Patch), ctx, id, updates)
 }
 
 // Store mocks base method.

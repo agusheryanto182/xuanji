@@ -23,7 +23,7 @@ type (
 		Store(ctx context.Context, product *entity.Product) error
 		GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) error
-		PartialUpdate(ctx context.Context, id uuid.UUID, updates map[string]any) error
+		Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error
 		Delete(ctx context.Context, id string) error
 	}
 )
