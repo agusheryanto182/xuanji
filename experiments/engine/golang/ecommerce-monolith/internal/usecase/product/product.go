@@ -124,6 +124,10 @@ func (uc *UseCase) UpdatePartial(ctx context.Context, input UpdatePartialProduct
 // Delete -.
 func (uc *UseCase) Delete(ctx context.Context, id string) error {
 	if err := uc.repo.Delete(ctx, id); err != nil {
+		if errors.Is(err, entity.ErrProductNotFound) {
+			return err
+		}
+
 		uc.l.Error(fmt.Errorf("ProductUseCase - Delete - uc.repo.Delete: %w", err))
 		return entity.ErrInvalidProductDelete
 	}

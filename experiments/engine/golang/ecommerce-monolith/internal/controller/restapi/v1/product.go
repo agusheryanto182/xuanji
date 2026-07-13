@@ -122,5 +122,20 @@ func (r *V1) UpdatePartial(ctx *fiber.Ctx) error {
 }
 
 func (r *V1) Delete(ctx *fiber.Ctx) error {
-	return nil
+	productID, err := parseUUIDParam(ctx, "id")
+	if err != nil {
+		return errorResponse(ctx, 400, err.Error())
+	}
+
+	if err := r.p.Delete(ctx.UserContext(), productID.String()); err != nil {
+		switch {
+		case errors.Is(err, entity.ErrProductNotFound):
+			return errorResponse(ctx, 404, err.Error())
+
+		default:
+			return errorResponse(ctx, 500, entity.ErrInternalServerError.Error())
+		}
+	}
+
+	return ctx.Status(204).Send(nil)
 }

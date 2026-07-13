@@ -124,9 +124,13 @@ func (r *ProductRepo) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	_, err = r.Pool.Exec(ctx, sql, args...)
+	cmdTag, err := r.Pool.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		return entity.ErrProductNotFound
 	}
 
 	return nil
