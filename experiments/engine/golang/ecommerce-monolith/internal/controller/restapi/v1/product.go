@@ -2,9 +2,11 @@ package v1
 
 import (
 	"errors"
+	"time"
 
 	"github.com/agusheryanto182/ecommerce-monolith/internal/controller/restapi/v1/request"
 	"github.com/agusheryanto182/ecommerce-monolith/internal/entity"
+	"github.com/agusheryanto182/ecommerce-monolith/internal/usecase/product"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -85,7 +87,38 @@ func (r *V1) Update(ctx *fiber.Ctx) error {
 }
 
 func (r *V1) UpdatePartial(ctx *fiber.Ctx) error {
-	return nil
+	productID, err := parseUUIDParam(ctx, "id")
+	if err != nil {
+		return errorResponse(ctx, 400, err.Error())
+	}
+
+	var body request.Patch
+
+	if err := r.bindAndValidate(ctx, &body); err != nil {
+		return errorResponse(ctx, 400, err.Error())
+	}
+
+	product := product.UpdatePartialProductInput{
+		ID:          productID,
+		Name:        body.Name,
+		Description: body.Description,
+		Price:       body.Price,
+		Stock:       body.Stock,
+		UpdatedAt:   time.Now().UTC(),
+	}
+
+	result, err := r.p.UpdatePartial(ctx.UserContext(), product)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrProductNotFound):
+			return errorResponse(ctx, 404, err.Error())
+
+		default:
+			return errorResponse(ctx, 500, entity.ErrInternalServerError.Error())
+		}
+	}
+
+	return ctx.Status(200).JSON(result)
 }
 
 func (r *V1) Delete(ctx *fiber.Ctx) error {
