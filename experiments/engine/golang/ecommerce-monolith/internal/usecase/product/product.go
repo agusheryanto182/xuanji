@@ -80,7 +80,7 @@ func (uc *UseCase) Update(ctx context.Context, product *entity.Product) (*entity
 }
 
 // UpdatePartial -.
-func (uc *UseCase) UpdatePartial(ctx context.Context, input UpdatePartialProductInput) (*entity.Product, error) {
+func (uc *UseCase) UpdatePartial(ctx context.Context, input PatchInput) (*entity.Product, error) {
 	if input.ID == uuid.Nil {
 		uc.l.Error(fmt.Errorf("ProductUseCase - UpdatePartial - input.ID is nil"))
 		return nil, entity.ErrInvalidIdProduct

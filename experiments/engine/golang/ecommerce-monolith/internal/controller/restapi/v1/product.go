@@ -98,7 +98,7 @@ func (r *V1) UpdatePartial(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, 400, err.Error())
 	}
 
-	product := product.UpdatePartialProductInput{
+	product := product.PatchInput{
 		ID:          productID,
 		Name:        body.Name,
 		Description: body.Description,

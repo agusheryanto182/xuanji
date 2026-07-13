@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type UpdatePartialProductInput struct {
+type PatchInput struct {
 	ID uuid.UUID
 
 	Name        *string

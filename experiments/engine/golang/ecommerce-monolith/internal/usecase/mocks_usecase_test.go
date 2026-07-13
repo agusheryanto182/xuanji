@@ -165,7 +165,7 @@ func (mr *MockProductMockRecorder) Update(ctx, product interface{}) *gomock.Call
 }
 
 // UpdatePartial mocks base method.
-func (m *MockProduct) UpdatePartial(ctx context.Context, input product.UpdatePartialProductInput) (*entity.Product, error) {
+func (m *MockProduct) UpdatePartial(ctx context.Context, input product.PatchInput) (*entity.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdatePartial", ctx, input)
 	ret0, _ := ret[0].(*entity.Product)
