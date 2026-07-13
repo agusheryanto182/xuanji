@@ -86,7 +86,7 @@ func (r *V1) Update(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(result)
 }
 
-func (r *V1) UpdatePartial(ctx *fiber.Ctx) error {
+func (r *V1) Patch(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
 	if err != nil {
 		return errorResponse(ctx, 400, err.Error())
@@ -107,7 +107,7 @@ func (r *V1) UpdatePartial(ctx *fiber.Ctx) error {
 		UpdatedAt:   time.Now().UTC(),
 	}
 
-	result, err := r.p.UpdatePartial(ctx.UserContext(), product)
+	result, err := r.p.Patch(ctx.UserContext(), product)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrProductNotFound):

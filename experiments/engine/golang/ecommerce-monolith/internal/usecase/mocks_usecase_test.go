@@ -134,6 +134,21 @@ func (mr *MockProductMockRecorder) GetByID(ctx, ID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProduct)(nil).GetByID), ctx, ID)
 }
 
+// Patch mocks base method.
+func (m *MockProduct) Patch(ctx context.Context, input product.PatchInput) (*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Patch", ctx, input)
+	ret0, _ := ret[0].(*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Patch indicates an expected call of Patch.
+func (mr *MockProductMockRecorder) Patch(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockProduct)(nil).Patch), ctx, input)
+}
+
 // Store mocks base method.
 func (m *MockProduct) Store(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	m.ctrl.T.Helper()
@@ -162,19 +177,4 @@ func (m *MockProduct) Update(ctx context.Context, product *entity.Product) (*ent
 func (mr *MockProductMockRecorder) Update(ctx, product interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProduct)(nil).Update), ctx, product)
-}
-
-// UpdatePartial mocks base method.
-func (m *MockProduct) UpdatePartial(ctx context.Context, input product.PatchInput) (*entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdatePartial", ctx, input)
-	ret0, _ := ret[0].(*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdatePartial indicates an expected call of UpdatePartial.
-func (mr *MockProductMockRecorder) UpdatePartial(ctx, input interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePartial", reflect.TypeOf((*MockProduct)(nil).UpdatePartial), ctx, input)
 }

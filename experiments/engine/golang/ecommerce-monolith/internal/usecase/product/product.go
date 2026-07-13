@@ -79,10 +79,10 @@ func (uc *UseCase) Update(ctx context.Context, product *entity.Product) (*entity
 	return product, nil
 }
 
-// UpdatePartial -.
-func (uc *UseCase) UpdatePartial(ctx context.Context, input PatchInput) (*entity.Product, error) {
+// Patch -.
+func (uc *UseCase) Patch(ctx context.Context, input PatchInput) (*entity.Product, error) {
 	if input.ID == uuid.Nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - UpdatePartial - input.ID is nil"))
+		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - input.ID is nil"))
 		return nil, entity.ErrInvalidIdProduct
 	}
 
@@ -101,20 +101,20 @@ func (uc *UseCase) UpdatePartial(ctx context.Context, input PatchInput) (*entity
 	}
 
 	if len(updatedFields) == 0 {
-		uc.l.Error(fmt.Errorf("ProductUseCase - UpdatePartial - no fields to update"))
+		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - no fields to update"))
 		return nil, entity.ErrInvalidProductPartialUpdate
 	}
 
 	updatedFields["updated_at"] = time.Now().UTC()
 
 	if err := uc.repo.PartialUpdate(ctx, input.ID, updatedFields); err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - UpdatePartial - uc.repo.PartialUpdate: %w", err))
+		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - uc.repo.PartialUpdate: %w", err))
 		return nil, entity.ErrInvalidProductPartialUpdate
 	}
 
 	product, err := uc.repo.GetByID(ctx, input.ID)
 	if err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - UpdatePartial - uc.GetProduct: %w", err))
+		uc.l.Error(fmt.Errorf("ProductUseCase - Patch - uc.GetProduct: %w", err))
 		return nil, entity.ErrProductNotFound
 	}
 

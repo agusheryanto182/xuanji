@@ -24,7 +24,7 @@ type (
 		Store(ctx context.Context, product *entity.Product) (*entity.Product, error)
 		GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) (*entity.Product, error)
-		UpdatePartial(ctx context.Context, input product.PatchInput) (*entity.Product, error)
+		Patch(ctx context.Context, input product.PatchInput) (*entity.Product, error)
 		Delete(ctx context.Context, id string) error
 	}
 )

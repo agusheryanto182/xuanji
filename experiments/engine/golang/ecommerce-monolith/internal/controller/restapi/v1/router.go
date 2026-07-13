@@ -33,7 +33,7 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtMa
 		productGroup.Post("", r.Store)
 		productGroup.Get("/:id", r.GetByID)
 		productGroup.Put("/:id", r.Update)
-		productGroup.Patch("/:id", r.UpdatePartial)
+		productGroup.Patch("/:id", r.Patch)
 		productGroup.Delete("/:id", r.Delete)
 	}
 }
