@@ -15,8 +15,10 @@ func newUserSeeder(t *testing.T) (*seed.UserSeeder, *MockUserRepo) {
 
 	ctrl := gomock.NewController(t)
 
+	l := NewMockInterface(ctrl)
+
 	repo := NewMockUserRepo(ctrl)
-	seeder := seed.NewUserSeeder(repo)
+	seeder := seed.NewUserSeeder(repo, l)
 
 	return seeder, repo
 }

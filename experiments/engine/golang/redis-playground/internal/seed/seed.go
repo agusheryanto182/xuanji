@@ -41,12 +41,12 @@ func Run(cfg *config.Config) {
 
 	err = Seeding(
 		context.Background(),
-		userSeed.NewUserSeeder(userRepo),
-		productSeed.NewProductSeeder(productRepo),
+		userSeed.NewUserSeeder(userRepo, l),
+		productSeed.NewProductSeeder(productRepo, l),
 	)
 	if err != nil {
 		l.Fatal(fmt.Errorf("seeder - Run - seeder.Seeding: %w", err))
 	}
 
-	l.Info("Seeding Completed")
+	l.Info("All seeding is completed")
 }

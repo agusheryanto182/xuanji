@@ -37,6 +37,49 @@ func (r *ProductRepo) Store(ctx context.Context, product *entity.Product) error 
 	return nil
 }
 
+// Batch Store -.
+func (r *ProductRepo) BatchStore(ctx context.Context, products []*entity.Product) error {
+	if len(products) == 0 {
+		return nil
+	}
+
+	builder := r.Builder.
+		Insert("products").
+		Columns(
+			"id",
+			"name",
+			"description",
+			"price",
+			"stock",
+			"created_at",
+			"updated_at",
+		)
+
+	for _, product := range products {
+		builder = builder.Values(
+			product.ID,
+			product.Name,
+			product.Description,
+			product.Price,
+			product.Stock,
+			product.CreatedAt,
+			product.UpdatedAt,
+		)
+	}
+
+	sql, args, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.Pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Get By ID
 func (r *ProductRepo) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
 	sql, args, err := r.Builder.
@@ -63,6 +106,51 @@ func (r *ProductRepo) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Produc
 	}
 
 	return &product, nil
+}
+
+// Get -.
+func (r *ProductRepo) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+	sql, args, err := r.Builder.
+		Select("id, name, description, price, stock, created_at, updated_at").
+		From("products").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []*entity.Product
+
+	for rows.Next() {
+		var product entity.Product
+
+		if err := rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Description,
+			&product.Price,
+			&product.Stock,
+			&product.CreatedAt,
+			&product.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		products = append(products, &product)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }
 
 // Full Update -.

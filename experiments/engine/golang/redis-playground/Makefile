@@ -154,6 +154,8 @@ mock: ## Generate mocks
 	mockgen -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go
 	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
 	mockgen -source ./pkg/logger/logger.go -package usecase_test > ./internal/usecase/mocks_logger_test.go
+	mockgen -source ./internal/repo/contracts.go -package seed_test > ./internal/seed/mocks_repo_test.go
+	mockgen -source ./pkg/logger/logger.go -package seed_test > ./internal/seed/mocks_logger_test.go
 .PHONY: mock
 
 # ==============================================================================

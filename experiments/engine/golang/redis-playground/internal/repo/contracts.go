@@ -21,6 +21,8 @@ type (
 	// ProductRepo -.
 	ProductRepo interface {
 		Store(ctx context.Context, product *entity.Product) error
+		BatchStore(ctx context.Context, products []*entity.Product) error
+		Get(ctx context.Context, limit, offset int) ([]*entity.Product, error)
 		GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) error
 		Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error

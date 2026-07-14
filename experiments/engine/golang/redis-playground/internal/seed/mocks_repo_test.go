@@ -10,6 +10,7 @@ import (
 
 	entity "github.com/agusheryanto182/redis-playground/internal/entity"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockUserRepo is a mock of UserRepo interface.
@@ -77,4 +78,127 @@ func (m *MockUserRepo) Store(ctx context.Context, user *entity.User) error {
 func (mr *MockUserRepoMockRecorder) Store(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockUserRepo)(nil).Store), ctx, user)
+}
+
+// MockProductRepo is a mock of ProductRepo interface.
+type MockProductRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockProductRepoMockRecorder
+}
+
+// MockProductRepoMockRecorder is the mock recorder for MockProductRepo.
+type MockProductRepoMockRecorder struct {
+	mock *MockProductRepo
+}
+
+// NewMockProductRepo creates a new mock instance.
+func NewMockProductRepo(ctrl *gomock.Controller) *MockProductRepo {
+	mock := &MockProductRepo{ctrl: ctrl}
+	mock.recorder = &MockProductRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockProductRepo) EXPECT() *MockProductRepoMockRecorder {
+	return m.recorder
+}
+
+// BatchStore mocks base method.
+func (m *MockProductRepo) BatchStore(ctx context.Context, products []*entity.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchStore", ctx, products)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BatchStore indicates an expected call of BatchStore.
+func (mr *MockProductRepoMockRecorder) BatchStore(ctx, products interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchStore", reflect.TypeOf((*MockProductRepo)(nil).BatchStore), ctx, products)
+}
+
+// Delete mocks base method.
+func (m *MockProductRepo) Delete(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockProductRepoMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepo)(nil).Delete), ctx, id)
+}
+
+// Get mocks base method.
+func (m *MockProductRepo) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, limit, offset)
+	ret0, _ := ret[0].([]*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockProductRepoMockRecorder) Get(ctx, limit, offset interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProductRepo)(nil).Get), ctx, limit, offset)
+}
+
+// GetByID mocks base method.
+func (m *MockProductRepo) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, ID)
+	ret0, _ := ret[0].(*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockProductRepoMockRecorder) GetByID(ctx, ID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProductRepo)(nil).GetByID), ctx, ID)
+}
+
+// Patch mocks base method.
+func (m *MockProductRepo) Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Patch", ctx, id, updates)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Patch indicates an expected call of Patch.
+func (mr *MockProductRepoMockRecorder) Patch(ctx, id, updates interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockProductRepo)(nil).Patch), ctx, id, updates)
+}
+
+// Store mocks base method.
+func (m *MockProductRepo) Store(ctx context.Context, product *entity.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Store", ctx, product)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Store indicates an expected call of Store.
+func (mr *MockProductRepoMockRecorder) Store(ctx, product interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockProductRepo)(nil).Store), ctx, product)
+}
+
+// Update mocks base method.
+func (m *MockProductRepo) Update(ctx context.Context, product *entity.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, product)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockProductRepoMockRecorder) Update(ctx, product interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProductRepo)(nil).Update), ctx, product)
 }
