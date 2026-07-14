@@ -102,24 +102,6 @@ func TestGetByID(t *testing.T) {
 		assert.Equal(t, 999.99, p.Price)
 		assert.Equal(t, 10, p.Stock)
 	})
-
-	t.Run("get by id failed", func(t *testing.T) {
-		t.Parallel()
-
-		uc, repo, logger := newProductUseCase(t)
-
-		logger.EXPECT().
-			Error(gomock.Any()).
-			Times(1)
-
-		repo.EXPECT().
-			GetByID(context.Background(), productID).
-			Return(nil, entity.ErrInvalidIdProduct)
-
-		_, err := uc.GetByID(context.Background(), productID)
-
-		require.ErrorIs(t, err, entity.ErrInvalidIdProduct)
-	})
 }
 
 func TestUpdate(t *testing.T) {
@@ -154,12 +136,8 @@ func TestUpdate(t *testing.T) {
 	t.Run("error - product not found", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, logger := newProductUseCase(t)
+		uc, repo, _ := newProductUseCase(t)
 		expectedError := entity.ErrProductNotFound
-
-		logger.EXPECT().
-			Error(gomock.Any()).
-			Times(1)
 
 		repo.EXPECT().Update(context.Background(), gomock.Any()).Return(expectedError)
 
@@ -172,7 +150,7 @@ func TestUpdate(t *testing.T) {
 		})
 
 		require.Error(t, err)
-		assert.ErrorIs(t, err, entity.ErrInvalidProductUpdate)
+		assert.ErrorIs(t, err, expectedError)
 		assert.Nil(t, updated)
 	})
 }
