@@ -7,120 +7,190 @@ include .env.example
 export
 endif
 
-BASE_STACK = docker compose -f docker-compose.yml
-INTEGRATION_TEST_STACK = $(BASE_STACK) -f docker-compose-integration-test.yml
-ALL_STACK = $(INTEGRATION_TEST_STACK)
+BASE_STACK := docker compose -f docker-compose.yml
+INTEGRATION_TEST_STACK := $(BASE_STACK) -f docker-compose-integration-test.yml
 
-# HELP =================================================================================================================
-# This will output the help for each task
-# thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+POSTGRES_CONTAINER := redis_playground_postgres
+REDIS_CONTAINER := redis_playground_redis
+
+POSTGRES_USER := user
+POSTGRES_DB := redis_playground_db
+
+# ==============================================================================
+# Help
+# ==============================================================================
+
 .PHONY: help
 
-help: ## Display this help screen
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+help: ## Display help
+	@awk 'BEGIN {FS=":.*##"; printf "\nUsage:\n  make \033[36m<TARGET>\033[0m\n"} \
+	/^[a-zA-Z_-]+:.*?##/ {printf "  \033[36m%-28s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-compose-up:
-	$(BASE_STACK) up --build -d redis_playground_db && docker compose logs -f
+# ==============================================================================
+# Docker
+# ==============================================================================
 
-compose-up-all: ### Run docker compose (with backend and reverse proxy)
+compose-up: ## Start PostgreSQL and Redis
+	$(BASE_STACK) up --build -d postgres redis
+.PHONY: compose-up
+
+compose-up-all: ## Start all services
 	$(BASE_STACK) up --build -d
 .PHONY: compose-up-all
 
-compose-up-integration-test: ### Run docker compose with integration test
-	$(INTEGRATION_TEST_STACK) up --build --abort-on-container-exit --exit-code-from integration-test; exit_code=$$?; \
-	$(INTEGRATION_TEST_STACK) down --remove-orphans; exit $$exit_code
-.PHONY: compose-up-integration-test
-
-compose-down: ### Down docker compose
-	$(ALL_STACK) down --remove-orphans
+compose-down: ## Stop all services
+	$(BASE_STACK) down --remove-orphans
 .PHONY: compose-down
 
-swag-v1: ### swag init
-	swag init --parseDependency -g internal/controller/restapi/router.go
-.PHONY: swag-v1
+compose-clean: ## Stop containers and remove volumes
+	$(BASE_STACK) down -v --remove-orphans
+.PHONY: compose-clean
 
-deps: ### deps tidy + verify
-	go mod tidy && go mod verify
+compose-restart: ## Restart all services
+	$(BASE_STACK) restart
+.PHONY: compose-restart
+
+compose-logs: ## Follow docker compose logs (example: make compose-logs postgres)
+	$(BASE_STACK) logs -f $(filter-out $@,$(MAKECMDGOALS))
+.PHONY: compose-logs
+
+compose-ps: ## Show running containers
+	$(BASE_STACK) ps
+.PHONY: compose-ps
+
+compose-up-integration-test: ## Run integration tests
+	$(INTEGRATION_TEST_STACK) up --build \
+		--abort-on-container-exit \
+		--exit-code-from integration-test; \
+	exit_code=$$?; \
+	$(INTEGRATION_TEST_STACK) down --remove-orphans; \
+	exit $$exit_code
+.PHONY: compose-up-integration-test
+
+# ==============================================================================
+# Docker CLI
+# ==============================================================================
+
+redis-cli: ## Open Redis CLI
+	docker exec -it $(REDIS_CONTAINER) redis-cli
+.PHONY: redis-cli
+
+psql: ## Open PostgreSQL CLI
+	docker exec -it $(POSTGRES_CONTAINER) \
+		psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+.PHONY: psql
+
+# ==============================================================================
+# Development
+# ==============================================================================
+
+deps: ## Download & verify dependencies
+	go mod tidy
+	go mod verify
 .PHONY: deps
 
-deps-audit: ### check dependencies vulnerabilities
+deps-audit: ## Check dependency vulnerabilities
 	govulncheck ./...
 .PHONY: deps-audit
 
-fix-diff: ### Show code changes by `go fix`
+swag-v1: ## Generate Swagger
+	swag init --parseDependency -g internal/controller/restapi/router.go
+.PHONY: swag-v1
+
+fix-diff: ## Show go fix diff
 	go fix -diff ./...
 .PHONY: fix-diff
 
-format: ### Run code formatter
+format: ## Format source code
 	go fix ./...
 	gofumpt -l -w .
 	gci write . --skip-generated -s standard -s default
 .PHONY: format
 
-run: deps swag-v1 ### run app
+run: deps swag-v1 ## Run application
 	go mod download && \
 	CGO_ENABLED=0 go run -tags migrate ./cmd/app
 .PHONY: run
 
-air: deps swag-v1 ### run app with Air
+air: deps swag-v1 ## Run application with Air
 	go mod download && \
 	air -c .air.toml
 .PHONY: air
 
-seed: ### seed data
+seed: ## Seed database
 	go run ./cmd/seed
 .PHONY: seed
 
-docker-rm-volume: ### remove docker volume
-	docker volume rm go-clean-template_pg-data
-.PHONY: docker-rm-volume
+# ==============================================================================
+# Linters
+# ==============================================================================
 
-linter-golangci: ### check by golangci linter
+linter-golangci: ## Run golangci-lint
 	golangci-lint run
 .PHONY: linter-golangci
 
-linter-hadolint: ### check by hadolint linter
+linter-hadolint: ## Run hadolint
 	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
 .PHONY: linter-hadolint
 
-linter-dotenv: ### check by dotenv linter
+linter-dotenv: ## Run dotenv-linter
 	dotenv-linter
 .PHONY: linter-dotenv
 
-test: ### run test
+# ==============================================================================
+# Testing
+# ==============================================================================
+
+test: ## Run unit tests
 	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/...
 .PHONY: test
 
-integration-test: ### run integration-test
-	go clean -testcache && go test -v ./integration-test/...
+integration-test: ## Run integration tests
+	go clean -testcache
+	go test -v ./integration-test/...
 .PHONY: integration-test
 
-mock: ### run mockgen
+mock: ## Generate mocks
 	mockgen -source ./internal/repo/contracts.go -package usecase_test > ./internal/usecase/mocks_repo_test.go
 	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
 	mockgen -source ./pkg/logger/logger.go -package usecase_test > ./internal/usecase/mocks_logger_test.go
 .PHONY: mock
 
-migrate-create:  ### create new migration
+# ==============================================================================
+# Migration
+# ==============================================================================
+
+migrate-create: ## Create migration
 	migrate create -ext sql -dir migrations '$(word 2,$(MAKECMDGOALS))'
 .PHONY: migrate-create
 
-migrate-up: ### migration up
+migrate-up: ## Apply migrations
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
 
-migrate-down:
+migrate-down: ## Rollback all migrations
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down
 .PHONY: migrate-down
 
-migrate-down-step:
+migrate-down-step: ## Rollback N migrations
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down $(STEP)
 .PHONY: migrate-down-step
 
-bin-deps: ### install tools
+# ==============================================================================
+# Tools
+# ==============================================================================
+
+bin-deps: ## Install development tools
 	go install tool
-	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
+	go install -tags postgres github.com/golang-migrate/migrate/v4/cmd/migrate
 .PHONY: bin-deps
 
-pre-commit: deps swag-v1 mock format linter-golangci test ### run pre-commit
+validate: format linter-golangci test ## Format, lint and test
+.PHONY: validate
+
+pre-commit: deps swag-v1 mock validate ## Run pre-commit checks
 .PHONY: pre-commit
+
+# Allow extra arguments (e.g. make compose-logs postgres)
+%:
+	@:

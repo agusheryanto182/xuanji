@@ -14,6 +14,7 @@ type (
 		HTTP    http
 		Log     log
 		PG      pg
+		Redis   redis
 		JWT     jwt
 		Metrics metrics
 		Swagger swagger
@@ -40,6 +41,11 @@ type (
 	pg struct {
 		PoolMax int    `env:"PG_POOL_MAX,required"`
 		URL     string `env:"PG_URL,required"`
+	}
+
+	// Redis -.
+	redis struct {
+		URL string `env:"REDIS_URL,required"`
 	}
 
 	// JWT -.
