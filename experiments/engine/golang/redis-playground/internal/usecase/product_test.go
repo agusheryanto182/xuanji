@@ -154,3 +154,44 @@ func TestUpdate(t *testing.T) {
 		assert.Nil(t, updated)
 	})
 }
+
+func TestGet(t *testing.T) {
+	t.Parallel()
+
+	t.Run("get success", func(t *testing.T) {
+		t.Parallel()
+
+		uc, repo, _ := newProductUseCase(t)
+
+		repo.EXPECT().Get(context.Background(), 15, 0).Return([]*entity.Product{
+			{
+				Name:        "Test Product 1",
+				Description: "This is a test product 1",
+				Price:       999.99,
+				Stock:       10,
+			},
+			{
+				Name:        "Test Product 2",
+				Description: "This is a test product 2",
+				Price:       999.99,
+				Stock:       10,
+			},
+			{
+				Name:        "Test Product 3",
+				Description: "This is a test product 3",
+				Price:       999.99,
+				Stock:       10,
+			},
+		}, nil)
+
+		products, err := uc.Get(context.Background(), 15, 0)
+
+		require.NoError(t, err)
+
+		assert.Len(t, products, 3)
+		assert.Equal(t, "Test Product 1", products[0].Name)
+		assert.Equal(t, "This is a test product 1", products[0].Description)
+		assert.Equal(t, 999.99, products[0].Price)
+		assert.Equal(t, 10, products[0].Stock)
+	})
+}

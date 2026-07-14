@@ -103,6 +103,20 @@ func (m *MockProductRepo) EXPECT() *MockProductRepoMockRecorder {
 	return m.recorder
 }
 
+// BatchStore mocks base method.
+func (m *MockProductRepo) BatchStore(ctx context.Context, products []*entity.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchStore", ctx, products)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BatchStore indicates an expected call of BatchStore.
+func (mr *MockProductRepoMockRecorder) BatchStore(ctx, products interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchStore", reflect.TypeOf((*MockProductRepo)(nil).BatchStore), ctx, products)
+}
+
 // Delete mocks base method.
 func (m *MockProductRepo) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
@@ -115,6 +129,21 @@ func (m *MockProductRepo) Delete(ctx context.Context, id string) error {
 func (mr *MockProductRepoMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepo)(nil).Delete), ctx, id)
+}
+
+// Get mocks base method.
+func (m *MockProductRepo) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, limit, offset)
+	ret0, _ := ret[0].([]*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockProductRepoMockRecorder) Get(ctx, limit, offset interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProductRepo)(nil).Get), ctx, limit, offset)
 }
 
 // GetByID mocks base method.

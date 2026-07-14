@@ -22,6 +22,7 @@ type (
 	// Product -.
 	Product interface {
 		Store(ctx context.Context, product *entity.Product) (*entity.Product, error)
+		Get(ctx context.Context, limit, offset int) ([]*entity.Product, error)
 		GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) (*entity.Product, error)
 		Patch(ctx context.Context, input product.PatchInput) (*entity.Product, error)

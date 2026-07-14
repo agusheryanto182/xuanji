@@ -119,6 +119,21 @@ func (mr *MockProductMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProduct)(nil).Delete), ctx, id)
 }
 
+// Get mocks base method.
+func (m *MockProduct) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, limit, offset)
+	ret0, _ := ret[0].([]*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockProductMockRecorder) Get(ctx, limit, offset interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProduct)(nil).Get), ctx, limit, offset)
+}
+
 // GetByID mocks base method.
 func (m *MockProduct) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
 	m.ctrl.T.Helper()

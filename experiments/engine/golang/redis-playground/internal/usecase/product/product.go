@@ -43,6 +43,11 @@ func (uc *UseCase) Store(ctx context.Context, product *entity.Product) (*entity.
 	return product, nil
 }
 
+// Get -.
+func (uc *UseCase) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+	return uc.repo.Get(ctx, limit, offset)
+}
+
 // GetProductByID -.
 func (uc *UseCase) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error) {
 	product, err := uc.repo.GetByID(ctx, ID)
