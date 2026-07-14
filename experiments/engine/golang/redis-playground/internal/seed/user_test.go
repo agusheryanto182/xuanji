@@ -27,11 +27,11 @@ func TestUserSeeder_Seed(t *testing.T) {
 		repo.EXPECT().
 			Store(gomock.Any(), gomock.AssignableToTypeOf(&entity.User{})).
 			DoAndReturn(func(ctx context.Context, user *entity.User) error {
-				if user.Username != "suga123" {
+				if user.Username != "suga" {
 					t.Errorf("unexpected username")
 				}
 
-				if user.Email != "suga123@example.com" {
+				if user.Email != "suga@example.com" {
 					t.Errorf("unexpected email")
 				}
 

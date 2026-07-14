@@ -6,7 +6,8 @@ import (
 
 	"github.com/agusheryanto182/redis-playground/config"
 	"github.com/agusheryanto182/redis-playground/internal/repo/persistent"
-	seed "github.com/agusheryanto182/redis-playground/internal/seed/user"
+	productSeed "github.com/agusheryanto182/redis-playground/internal/seed/product"
+	userSeed "github.com/agusheryanto182/redis-playground/internal/seed/user"
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
 	"github.com/agusheryanto182/redis-playground/pkg/postgres"
 )
@@ -36,10 +37,12 @@ func Run(cfg *config.Config) {
 	defer pg.Close()
 
 	userRepo := persistent.NewUserRepo(pg)
+	productRepo := persistent.NewProductRepo(pg)
 
 	err = Seeding(
 		context.Background(),
-		seed.NewUserSeeder(userRepo),
+		userSeed.NewUserSeeder(userRepo),
+		productSeed.NewProductSeeder(productRepo),
 	)
 	if err != nil {
 		l.Fatal(fmt.Errorf("seeder - Run - seeder.Seeding: %w", err))
