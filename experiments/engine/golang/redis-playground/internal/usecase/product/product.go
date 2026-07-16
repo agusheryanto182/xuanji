@@ -44,8 +44,8 @@ func (uc *UseCase) Store(ctx context.Context, product *entity.Product) (*entity.
 }
 
 // Get -.
-func (uc *UseCase) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
-	return uc.repo.Get(ctx, limit, offset)
+func (uc *UseCase) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+	return uc.repo.GetAll(ctx, limit, offset)
 }
 
 // GetProductByID -.

@@ -31,6 +31,7 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtMa
 	productGroup := protected.Group("/product")
 	{
 		productGroup.Post("", r.Store)
+		productGroup.Get("", r.GetAll)
 		productGroup.Get("/:id", r.GetByID)
 		productGroup.Put("/:id", r.Update)
 		productGroup.Patch("/:id", r.Patch)

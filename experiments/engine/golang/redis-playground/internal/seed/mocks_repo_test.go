@@ -131,19 +131,19 @@ func (mr *MockProductRepoMockRecorder) Delete(ctx, id interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepo)(nil).Delete), ctx, id)
 }
 
-// Get mocks base method.
-func (m *MockProductRepo) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+// GetAll mocks base method.
+func (m *MockProductRepo) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
 	ret0, _ := ret[0].([]*entity.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get.
-func (mr *MockProductRepoMockRecorder) Get(ctx, limit, offset interface{}) *gomock.Call {
+// GetAll indicates an expected call of GetAll.
+func (mr *MockProductRepoMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProductRepo)(nil).Get), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockProductRepo)(nil).GetAll), ctx, limit, offset)
 }
 
 // GetByID mocks base method.

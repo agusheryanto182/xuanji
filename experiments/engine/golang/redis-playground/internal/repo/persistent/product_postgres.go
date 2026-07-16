@@ -109,7 +109,7 @@ func (r *ProductRepo) GetByID(ctx context.Context, ID uuid.UUID) (*entity.Produc
 }
 
 // Get -.
-func (r *ProductRepo) Get(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
+func (r *ProductRepo) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, error) {
 	sql, args, err := r.Builder.
 		Select("id, name, description, price, stock, created_at, updated_at").
 		From("products").

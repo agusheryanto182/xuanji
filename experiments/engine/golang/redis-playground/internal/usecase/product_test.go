@@ -155,7 +155,7 @@ func TestUpdate(t *testing.T) {
 	})
 }
 
-func TestGet(t *testing.T) {
+func TestGetAll(t *testing.T) {
 	t.Parallel()
 
 	t.Run("get success", func(t *testing.T) {
@@ -163,7 +163,7 @@ func TestGet(t *testing.T) {
 
 		uc, repo, _ := newProductUseCase(t)
 
-		repo.EXPECT().Get(context.Background(), 15, 0).Return([]*entity.Product{
+		repo.EXPECT().GetAll(context.Background(), 15, 0).Return([]*entity.Product{
 			{
 				Name:        "Test Product 1",
 				Description: "This is a test product 1",
@@ -184,7 +184,7 @@ func TestGet(t *testing.T) {
 			},
 		}, nil)
 
-		products, err := uc.Get(context.Background(), 15, 0)
+		products, err := uc.GetAll(context.Background(), 15, 0)
 
 		require.NoError(t, err)
 

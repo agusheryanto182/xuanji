@@ -20,3 +20,18 @@ func parseUUIDParam(c *fiber.Ctx, key string) (uuid.UUID, error) {
 
 	return uid, nil
 }
+
+func parseLimitAndOffset(c *fiber.Ctx, limitDefault, offsetDefault int) (limit, offset int) {
+	limit = limitDefault
+	offset = offsetDefault
+
+	if c.Query("limit") != "" {
+		limit = c.QueryInt("limit")
+	}
+
+	if c.Query("offset") != "" {
+		offset = c.QueryInt("offset")
+	}
+
+	return limit, offset
+}

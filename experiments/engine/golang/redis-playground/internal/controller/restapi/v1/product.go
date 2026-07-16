@@ -32,6 +32,16 @@ func (r *V1) Store(ctx *fiber.Ctx) error {
 	return ctx.Status(201).JSON(result)
 }
 
+func (r *V1) GetAll(ctx *fiber.Ctx) error {
+	limit, offset := parseLimitAndOffset(ctx, 10, 0)
+	products, err := r.p.GetAll(ctx.UserContext(), limit, offset)
+	if err != nil {
+		return errorResponse(ctx, 500, entity.ErrInternalServerError.Error())
+	}
+
+	return ctx.Status(200).JSON(products)
+}
+
 func (r *V1) GetByID(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
 	if err != nil {
