@@ -50,19 +50,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     }
                 }
@@ -103,19 +103,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     }
                 }
@@ -147,19 +147,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.Error"
+                            "$ref": "#/definitions/github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error"
                         }
                     }
                 }
@@ -192,12 +192,14 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.Error": {
+        "github_com_agusheryanto182_redis-playground_internal_controller_restapi_v1_response.Error": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "message"
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },

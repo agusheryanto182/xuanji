@@ -1,8 +1,7 @@
 package v1
 
 import (
-	"errors"
-
+	"github.com/agusheryanto182/redis-playground/internal/entity"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -10,12 +9,12 @@ import (
 func parseUUIDParam(c *fiber.Ctx, key string) (uuid.UUID, error) {
 	id := c.Params(key)
 	if id == "" {
-		return uuid.Nil, errors.New("id is required")
+		return uuid.Nil, entity.ErrIdIsRequired
 	}
 
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return uuid.Nil, errors.New("invalid id")
+		return uuid.Nil, err
 	}
 
 	return uid, nil

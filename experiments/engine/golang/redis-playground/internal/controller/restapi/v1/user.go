@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/agusheryanto182/redis-playground/internal/controller/restapi/v1/request"
 	"github.com/agusheryanto182/redis-playground/internal/controller/restapi/v1/response"
@@ -26,29 +25,34 @@ func (r *V1) register(ctx *fiber.Ctx) error {
 	var body request.Register
 
 	if err := ctx.BodyParser(&body); err != nil {
-		r.l.Error(err, "restapi - v1 - register")
+		r.l.Error(err, "restapi - v1 - register body parser")
 
-		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
+		return errorResponse(ctx, fiber.StatusBadRequest, response.ErrInvalidRequestBody, entity.ErrorInvalidRequestBody.Error())
 	}
 
 	if err := r.v.Struct(body); err != nil {
-		r.l.Error(err, "restapi - v1 - register")
+		r.l.Error(err, "restapi - v1 - register validation")
 
-		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
+		return errorResponse(ctx, fiber.StatusBadRequest, response.ErrInvalidValidation, entity.ErrInvalidValidation.Error())
 	}
 
 	user, err := r.u.Register(ctx.UserContext(), body.Username, body.Email, body.Password)
 	if err != nil {
-		r.l.Error(err, "restapi - v1 - register")
+		r.l.Error(err, "restapi - v1 - uc register")
 
 		if errors.Is(err, entity.ErrUserAlreadyExists) {
-			return errorResponse(ctx, http.StatusConflict, "user already exists")
+			return errorResponse(ctx, fiber.StatusConflict, response.ErrUserAlreadyExists, entity.ErrUserAlreadyExists.Error())
 		}
 
-		return errorResponse(ctx, http.StatusInternalServerError, "internal server error")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(user)
+	return successResponse[entity.User](
+		ctx,
+		fiber.StatusCreated,
+		user,
+		nil,
+	)
 }
 
 // @Summary     Login
@@ -67,29 +71,34 @@ func (r *V1) login(ctx *fiber.Ctx) error {
 	var body request.Login
 
 	if err := ctx.BodyParser(&body); err != nil {
-		r.l.Error(err, "restapi - v1 - login")
+		r.l.Error(err, "restapi - v1 - login - body parser")
 
-		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
+		return errorResponse(ctx, fiber.StatusBadRequest, response.ErrInvalidRequestBody, entity.ErrorInvalidRequestBody.Error())
 	}
 
 	if err := r.v.Struct(body); err != nil {
-		r.l.Error(err, "restapi - v1 - login")
+		r.l.Error(err, "restapi - v1 - register validation")
 
-		return errorResponse(ctx, http.StatusBadRequest, "invalid request body")
+		return errorResponse(ctx, fiber.StatusBadRequest, response.ErrInvalidValidation, entity.ErrInvalidValidation.Error())
 	}
 
 	token, err := r.u.Login(ctx.UserContext(), body.Email, body.Password)
 	if err != nil {
-		r.l.Error(err, "restapi - v1 - login")
+		r.l.Error(err, "restapi - v1 - uc login")
 
 		if errors.Is(err, entity.ErrInvalidCredentials) {
-			return errorResponse(ctx, http.StatusUnauthorized, "invalid credentials")
+			return errorResponse(ctx, fiber.StatusUnauthorized, response.ErrInvalidCredentials, entity.ErrInvalidCredentials.Error())
 		}
 
-		return errorResponse(ctx, http.StatusInternalServerError, "internal server error")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(response.Token{Token: token})
+	return successResponse[string](
+		ctx,
+		fiber.StatusOK,
+		token,
+		nil,
+	)
 }
 
 // @Summary     Get profile
@@ -106,19 +115,24 @@ func (r *V1) login(ctx *fiber.Ctx) error {
 func (r *V1) profile(ctx *fiber.Ctx) error {
 	userID, ok := ctx.Locals("userID").(string)
 	if !ok {
-		return errorResponse(ctx, http.StatusUnauthorized, "unauthorized")
+		return errorResponse(ctx, fiber.StatusUnauthorized, response.ErrUnauthorized, entity.ErrUnauthorized.Error())
 	}
 
 	user, err := r.u.GetUser(ctx.UserContext(), userID)
 	if err != nil {
-		r.l.Error(err, "restapi - v1 - profile")
+		r.l.Error(err, "restapi - v1 - uc profile")
 
 		if errors.Is(err, entity.ErrUserNotFound) {
-			return errorResponse(ctx, http.StatusNotFound, "user not found")
+			return errorResponse(ctx, fiber.StatusNotFound, response.ErrNotFound, entity.ErrUserNotFound.Error())
 		}
 
-		return errorResponse(ctx, http.StatusInternalServerError, "internal server error")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(user)
+	return successResponse[entity.User](
+		ctx,
+		fiber.StatusOK,
+		user,
+		nil,
+	)
 }

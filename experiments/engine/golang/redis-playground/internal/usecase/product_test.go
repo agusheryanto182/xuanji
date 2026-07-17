@@ -184,11 +184,14 @@ func TestGetAll(t *testing.T) {
 			},
 		}, nil)
 
-		products, err := uc.GetAll(context.Background(), 15, 0)
+		repo.EXPECT().CountProducts(context.Background()).Return(3, nil)
+
+		products, meta, err := uc.GetAll(context.Background(), 15, 0)
 
 		require.NoError(t, err)
 
 		assert.Len(t, products, 3)
+		assert.Equal(t, meta, 3)
 		assert.Equal(t, "Test Product 1", products[0].Name)
 		assert.Equal(t, "This is a test product 1", products[0].Description)
 		assert.Equal(t, 999.99, products[0].Price)

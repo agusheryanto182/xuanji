@@ -117,6 +117,21 @@ func (mr *MockProductRepoMockRecorder) BatchStore(ctx, products interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchStore", reflect.TypeOf((*MockProductRepo)(nil).BatchStore), ctx, products)
 }
 
+// CountProducts mocks base method.
+func (m *MockProductRepo) CountProducts(ctx context.Context) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountProducts", ctx)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountProducts indicates an expected call of CountProducts.
+func (mr *MockProductRepoMockRecorder) CountProducts(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountProducts", reflect.TypeOf((*MockProductRepo)(nil).CountProducts), ctx)
+}
+
 // Delete mocks base method.
 func (m *MockProductRepo) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()

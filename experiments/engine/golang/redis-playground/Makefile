@@ -89,7 +89,8 @@ deps: ## Download & verify dependencies
 	go mod verify
 .PHONY: deps
 
-deps-audit: ## Check dependency vulnerabilities
+deps-audit: ## Check dependency vulnerabilitiesclear
+
 	govulncheck ./...
 .PHONY: deps-audit
 

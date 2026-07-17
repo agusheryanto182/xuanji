@@ -5,6 +5,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func errorResponse(ctx *fiber.Ctx, code int, msg string) error {
-	return ctx.Status(code).JSON(response.Error{Error: msg})
+func errorResponse(ctx *fiber.Ctx, status int, code, msg string) error {
+	return ctx.Status(status).JSON(response.Response[any]{
+		Status: response.StatusError,
+		Error: &response.Error{
+			Code:    code,
+			Message: msg,
+		},
+	})
 }
