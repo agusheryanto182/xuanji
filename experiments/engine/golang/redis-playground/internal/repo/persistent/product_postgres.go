@@ -153,6 +153,24 @@ func (r *ProductRepo) GetAll(ctx context.Context, limit, offset int) ([]*entity.
 	return products, nil
 }
 
+// Count products -.
+func (r *ProductRepo) CountProducts(ctx context.Context) (int, error) {
+	sql, args, err := r.Builder.
+		Select("count(*)").
+		From("products").
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	var count int
+	if err := r.Pool.QueryRow(ctx, sql, args...).Scan(&count); err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 // Full Update -.
 func (r *ProductRepo) Update(ctx context.Context, product *entity.Product) error {
 	sql, args, err := r.Builder.

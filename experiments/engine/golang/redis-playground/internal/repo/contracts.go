@@ -23,6 +23,7 @@ type (
 		Store(ctx context.Context, product *entity.Product) error
 		BatchStore(ctx context.Context, products []*entity.Product) error
 		GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, error)
+		CountProducts(ctx context.Context) (int, error)
 		GetByID(ctx context.Context, ID uuid.UUID) (*entity.Product, error)
 		Update(ctx context.Context, product *entity.Product) error
 		Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error
