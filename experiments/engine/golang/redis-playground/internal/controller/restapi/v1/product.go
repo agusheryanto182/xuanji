@@ -54,25 +54,21 @@ func (r *V1) GetAll(ctx *fiber.Ctx) error {
 func (r *V1) GetByID(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrIdIsRequired):
+		if errors.Is(err, entity.ErrIdIsRequired) {
 			return errorResponse(ctx, fiber.StatusBadRequest, response.ErrIdIsRequired, entity.ErrIdIsRequired.Error())
-
-		default:
-			r.l.Error(err, "restapi - v1- getByID")
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		r.l.Error(err, "restapi - v1- getByID")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	product, err := r.p.GetByID(ctx.UserContext(), productID)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrProductNotFound):
+		if errors.Is(err, entity.ErrProductNotFound) {
 			return errorResponse(ctx, fiber.StatusNotFound, response.ErrNotFound, entity.ErrProductNotFound.Error())
-
-		default:
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	return successResponse(ctx, fiber.StatusOK, product, nil)
@@ -81,14 +77,12 @@ func (r *V1) GetByID(ctx *fiber.Ctx) error {
 func (r *V1) Update(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrIdIsRequired):
+		if errors.Is(err, entity.ErrIdIsRequired) {
 			return errorResponse(ctx, fiber.StatusBadRequest, response.ErrIdIsRequired, entity.ErrIdIsRequired.Error())
-
-		default:
-			r.l.Error(err, "restapi - v1- getByID")
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		r.l.Error(err, "restapi - v1- getByID")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	var body request.Update
@@ -108,13 +102,11 @@ func (r *V1) Update(ctx *fiber.Ctx) error {
 
 	result, err := r.p.Update(ctx.UserContext(), product)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrProductNotFound):
+		if errors.Is(err, entity.ErrProductNotFound) {
 			return errorResponse(ctx, fiber.StatusNotFound, response.ErrNotFound, entity.ErrProductNotFound.Error())
-
-		default:
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	return successResponse(ctx, fiber.StatusOK, result, nil)
@@ -123,14 +115,12 @@ func (r *V1) Update(ctx *fiber.Ctx) error {
 func (r *V1) Patch(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrIdIsRequired):
+		if errors.Is(err, entity.ErrIdIsRequired) {
 			return errorResponse(ctx, fiber.StatusBadRequest, response.ErrIdIsRequired, entity.ErrIdIsRequired.Error())
-
-		default:
-			r.l.Error(err, "restapi - v1- getByID")
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		r.l.Error(err, "restapi - v1- getByID")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	var body request.Patch
@@ -151,13 +141,11 @@ func (r *V1) Patch(ctx *fiber.Ctx) error {
 
 	result, err := r.p.Patch(ctx.UserContext(), product)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrProductNotFound):
+		if errors.Is(err, entity.ErrProductNotFound) {
 			return errorResponse(ctx, fiber.StatusNotFound, response.ErrNotFound, entity.ErrProductNotFound.Error())
-
-		default:
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	return ctx.Status(200).JSON(result)
@@ -166,24 +154,20 @@ func (r *V1) Patch(ctx *fiber.Ctx) error {
 func (r *V1) Delete(ctx *fiber.Ctx) error {
 	productID, err := parseUUIDParam(ctx, "id")
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrIdIsRequired):
+		if errors.Is(err, entity.ErrIdIsRequired) {
 			return errorResponse(ctx, fiber.StatusBadRequest, response.ErrIdIsRequired, entity.ErrIdIsRequired.Error())
-
-		default:
-			r.l.Error(err, "restapi - v1- getByID")
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		r.l.Error(err, "restapi - v1- getByID")
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	if err := r.p.Delete(ctx.UserContext(), productID.String()); err != nil {
-		switch {
-		case errors.Is(err, entity.ErrProductNotFound):
+		if errors.Is(err, entity.ErrProductNotFound) {
 			return errorResponse(ctx, fiber.StatusNotFound, response.ErrNotFound, entity.ErrProductNotFound.Error())
-
-		default:
-			return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 		}
+
+		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
 	return successResponse[any](
