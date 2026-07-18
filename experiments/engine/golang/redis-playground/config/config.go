@@ -34,7 +34,9 @@ type (
 
 	// Log -.
 	log struct {
-		Level string `env:"LOG_LEVEL,required"`
+		Level                 string        `env:"LOG_LEVEL,required"`
+		PgxLevel              string        `env:"PGX_LOG_LEVEL,required"`
+		PgxSlowQueryThreshold time.Duration `env:"PGX_SLOW_QUERY_THRESHOLD,required"`
 	}
 
 	// PG -.

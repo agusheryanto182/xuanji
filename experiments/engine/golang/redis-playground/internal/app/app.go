@@ -16,6 +16,7 @@ import (
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
 	"github.com/agusheryanto182/redis-playground/pkg/postgres"
+	"github.com/jackc/pgx/v5/tracelog"
 )
 
 type useCases struct {
@@ -25,6 +26,15 @@ type useCases struct {
 
 type servers struct {
 	http *httpserver.Server
+}
+
+var pgxLevels = map[string]tracelog.LogLevel{
+	"trace": tracelog.LogLevelTrace,
+	"debug": tracelog.LogLevelDebug,
+	"info":  tracelog.LogLevelInfo,
+	"warn":  tracelog.LogLevelWarn,
+	"error": tracelog.LogLevelError,
+	"none":  tracelog.LogLevelNone,
 }
 
 func initUseCases(pg *postgres.Postgres, jwtManager *jwt.Manager, l logger.Interface) useCases {
@@ -73,12 +83,24 @@ func (s *servers) shutdownServers(l logger.Interface) {
 	}
 }
 
+func parsePgxLogLevel(level string) tracelog.LogLevel {
+	if l, ok := pgxLevels[level]; ok {
+		return l
+	}
+	return tracelog.LogLevelInfo
+}
+
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
+	pgxLogger := logger.NewPGXLogger(l, cfg.Log.PgxSlowQueryThreshold)
 
 	// Repository
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax), postgres.WithTracer(&tracelog.TraceLog{
+		Logger:   pgxLogger,
+		LogLevel: parsePgxLogLevel(cfg.Log.PgxLevel),
+	}))
+
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}

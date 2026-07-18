@@ -101,3 +101,7 @@ func (l *Logger) msg(level zerolog.Level, message any, args ...any) {
 		l.log(level, fmt.Sprintf("%s message %v has unknown type %v", level, message, msg), args...)
 	}
 }
+
+func (l *Logger) Event(level zerolog.Level) *zerolog.Event {
+	return l.logger.WithLevel(level)
+}
