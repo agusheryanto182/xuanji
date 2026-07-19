@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -11,19 +12,55 @@ import (
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/redis/go-redis/v9"
+)
+
+const (
+	productsCachePattern = "products:*"
+	productsCacheTTL     = 5 * time.Minute
 )
 
 // UseCase -.
 type UseCase struct {
-	repo repo.ProductRepo
-	l    logger.Interface
+	repo  repo.ProductRepo
+	redis *redis.Client
+	l     logger.Interface
 }
 
 // New -.
-func New(r repo.ProductRepo, l logger.Interface) *UseCase {
+func New(r repo.ProductRepo, rdb *redis.Client, l logger.Interface) *UseCase {
 	return &UseCase{
-		repo: r,
-		l:    l,
+		repo:  r,
+		redis: rdb,
+		l:     l,
+	}
+}
+
+func (uc *UseCase) invalidateProductsCache(ctx context.Context) {
+	var cursor uint64
+	var keys []string
+
+	for {
+		batch, nextCursor, err := uc.redis.Scan(ctx, cursor, productsCachePattern, 100).Result()
+		if err != nil {
+			uc.l.Warn("Failed to scan products cache keys: %v", err)
+			return
+		}
+
+		keys = append(keys, batch...)
+		cursor = nextCursor
+
+		if cursor == 0 {
+			break
+		}
+	}
+
+	if len(keys) == 0 {
+		return
+	}
+
+	if err := uc.redis.Del(ctx, keys...).Err(); err != nil {
+		uc.l.Warn("Failed to invalidate products cache: %v", err)
 	}
 }
 
@@ -40,21 +77,65 @@ func (uc *UseCase) Store(ctx context.Context, product *entity.Product) (*entity.
 		return nil, entity.ErrInvalidProductCreate
 	}
 
+	uc.invalidateProductsCache(ctx)
+
 	return product, nil
 }
 
 // Get -.
-func (uc *UseCase) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, int, error) {
-	products, err := uc.repo.GetAll(ctx, limit, offset)
-	if err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - GetAll - uc.repo.GetAll: %w", err))
-		return nil, 0, entity.ErrInternalServerError
+func (uc *UseCase) GetAll(
+	ctx context.Context,
+	limit,
+	offset int,
+) ([]*entity.Product, int, error) {
+
+	cacheKey := fmt.Sprintf("products:%d:%d", limit, offset)
+
+	value, err := uc.redis.Get(ctx, cacheKey).Result()
+	switch {
+	case err == nil:
+		var cache ProductCache
+
+		if err := json.Unmarshal([]byte(value), &cache); err == nil {
+			uc.l.Debug("Cache hit: %s", cacheKey)
+
+			return cache.Products, cache.Total, nil
+		}
+
+		uc.l.Warn("Failed to unmarshal cache: %v", err)
+
+	case errors.Is(err, redis.Nil):
+		uc.l.Debug("Cache miss: %s", cacheKey)
+
+	default:
+		uc.l.Warn("Redis GET failed: %v", err)
 	}
 
 	total, err := uc.repo.CountProducts(ctx)
 	if err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - GetAll - uc.repo.CountProducts: %w", err))
+		uc.l.Error(fmt.Errorf("ProductUseCase - CountProducts: %w", err))
 		return nil, 0, entity.ErrInternalServerError
+	}
+
+	products, err := uc.repo.GetAll(ctx, limit, offset)
+	if err != nil {
+		uc.l.Error(fmt.Errorf("ProductUseCase - GetAll: %w", err))
+		return nil, 0, entity.ErrInternalServerError
+	}
+
+	cache := ProductCache{
+		Products: products,
+		Total:    total,
+	}
+
+	bytes, err := json.Marshal(cache)
+	if err != nil {
+		uc.l.Warn("Failed to marshal cache: %v", err)
+		return products, total, nil
+	}
+
+	if err := uc.redis.Set(ctx, cacheKey, bytes, productsCacheTTL).Err(); err != nil {
+		uc.l.Warn("Redis SET failed: %v", err)
 	}
 
 	return products, total, nil
@@ -92,6 +173,8 @@ func (uc *UseCase) Update(ctx context.Context, product *entity.Product) (*entity
 		uc.l.Error(fmt.Errorf("ProductUseCase - Update - uc.repo.Update: %w", err))
 		return nil, entity.ErrInternalServerError
 	}
+
+	uc.invalidateProductsCache(ctx)
 
 	return product, nil
 }
@@ -135,6 +218,8 @@ func (uc *UseCase) Patch(ctx context.Context, input PatchInput) (*entity.Product
 		return nil, entity.ErrProductNotFound
 	}
 
+	uc.invalidateProductsCache(ctx)
+
 	return product, nil
 }
 
@@ -148,6 +233,8 @@ func (uc *UseCase) Delete(ctx context.Context, id string) error {
 		uc.l.Error(fmt.Errorf("ProductUseCase - Delete - uc.repo.Delete: %w", err))
 		return entity.ErrInvalidProductDelete
 	}
+
+	uc.invalidateProductsCache(ctx)
 
 	return nil
 }

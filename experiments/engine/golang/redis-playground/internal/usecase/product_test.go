@@ -16,10 +16,9 @@ func newProductUseCase(t *testing.T) (*product.UseCase, *MockProductRepo, *MockI
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
-
 	repo := NewMockProductRepo(ctrl)
 	l := NewMockInterface(ctrl)
-	useCase := product.New(repo, l)
+	useCase := product.New(repo, nil, l)
 
 	return useCase, repo, l
 }

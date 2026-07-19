@@ -120,11 +120,11 @@ func (mr *MockProductMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
 }
 
 // GetAll mocks base method.
-func (m *MockProduct) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, *int, error) {
+func (m *MockProduct) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
 	ret0, _ := ret[0].([]*entity.Product)
-	ret1, _ := ret[1].(*int)
+	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }

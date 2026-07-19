@@ -3,6 +3,7 @@ package product
 import (
 	"time"
 
+	"github.com/agusheryanto182/redis-playground/internal/entity"
 	"github.com/google/uuid"
 )
 
@@ -15,4 +16,9 @@ type PatchInput struct {
 	Stock       *int
 
 	UpdatedAt time.Time
+}
+
+type ProductCache struct {
+	Products []*entity.Product `json:"products"`
+	Total    int               `json:"total"`
 }

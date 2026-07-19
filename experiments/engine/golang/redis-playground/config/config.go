@@ -47,7 +47,9 @@ type (
 
 	// Redis -.
 	redis struct {
-		URL string `env:"REDIS_URL,required"`
+		URL          string `env:"REDIS_URL,required"`
+		PoolSize     int    `env:"REDIS_POOL_SIZE" envDefault:"10"`
+		MinIdleConns int    `env:"REDIS_MIN_IDLE_CONNS" envDefault:"0"`
 	}
 
 	// JWT -.

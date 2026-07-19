@@ -16,7 +16,9 @@ import (
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
 	"github.com/agusheryanto182/redis-playground/pkg/postgres"
+	"github.com/agusheryanto182/redis-playground/pkg/redis"
 	"github.com/jackc/pgx/v5/tracelog"
+	goredis "github.com/redis/go-redis/v9"
 )
 
 type useCases struct {
@@ -37,13 +39,13 @@ var pgxLevels = map[string]tracelog.LogLevel{
 	"none":  tracelog.LogLevelNone,
 }
 
-func initUseCases(pg *postgres.Postgres, jwtManager *jwt.Manager, l logger.Interface) useCases {
+func initUseCases(pg *postgres.Postgres, rdb *goredis.Client, jwtManager *jwt.Manager, l logger.Interface) useCases {
 	userRepo := persistent.NewUserRepo(pg)
 	productRepo := persistent.NewProductRepo(pg)
 
 	return useCases{
 		user:    user.New(userRepo, jwtManager),
-		product: product.New(productRepo, l),
+		product: product.New(productRepo, rdb, l),
 	}
 }
 
@@ -106,10 +108,20 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
+	rdb, err := redis.New(
+		cfg.Redis.URL,
+		redis.PoolSize(cfg.Redis.PoolSize),
+		redis.MinIdleConns(cfg.Redis.MinIdleConns),
+	)
+
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - redis.New: %w", err))
+	}
+
 	// JWT
 	jwtManager := jwt.New(cfg.JWT.Secret, cfg.JWT.TokenExpiry)
 
-	uc := initUseCases(pg, jwtManager, l)
+	uc := initUseCases(pg, rdb, jwtManager, l)
 	s := initServers(cfg, uc, jwtManager, l)
 	s.startServers()
 	s.waitForShutdown(l)
