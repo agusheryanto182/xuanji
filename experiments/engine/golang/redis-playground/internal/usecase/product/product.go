@@ -111,15 +111,15 @@ func (uc *UseCase) GetAll(
 		uc.l.Warn("Redis GET failed: %v", err)
 	}
 
-	total, err := uc.repo.CountProducts(ctx)
-	if err != nil {
-		uc.l.Error(fmt.Errorf("ProductUseCase - CountProducts: %w", err))
-		return nil, 0, entity.ErrInternalServerError
-	}
-
 	products, err := uc.repo.GetAll(ctx, limit, offset)
 	if err != nil {
 		uc.l.Error(fmt.Errorf("ProductUseCase - GetAll: %w", err))
+		return nil, 0, entity.ErrInternalServerError
+	}
+
+	total, err := uc.repo.CountProducts(ctx)
+	if err != nil {
+		uc.l.Error(fmt.Errorf("ProductUseCase - CountProducts: %w", err))
 		return nil, 0, entity.ErrInternalServerError
 	}
 
