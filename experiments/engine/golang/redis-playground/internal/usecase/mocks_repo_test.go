@@ -36,6 +36,20 @@ func (m *MockUserRepo) EXPECT() *MockUserRepoMockRecorder {
 	return m.recorder
 }
 
+// BatchStore mocks base method.
+func (m *MockUserRepo) BatchStore(ctx context.Context, users []*entity.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchStore", ctx, users)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BatchStore indicates an expected call of BatchStore.
+func (mr *MockUserRepoMockRecorder) BatchStore(ctx, users interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchStore", reflect.TypeOf((*MockUserRepo)(nil).BatchStore), ctx, users)
+}
+
 // GetByEmail mocks base method.
 func (m *MockUserRepo) GetByEmail(ctx context.Context, email string) (entity.User, error) {
 	m.ctrl.T.Helper()
