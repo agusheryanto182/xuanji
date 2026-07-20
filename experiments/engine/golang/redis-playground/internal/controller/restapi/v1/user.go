@@ -47,7 +47,7 @@ func (r *V1) register(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
-	return successResponse[entity.User](
+	return successResponse(
 		ctx,
 		fiber.StatusCreated,
 		user,
@@ -93,7 +93,7 @@ func (r *V1) login(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
-	return successResponse[string](
+	return successResponse(
 		ctx,
 		fiber.StatusOK,
 		token,
@@ -129,7 +129,7 @@ func (r *V1) profile(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
-	return successResponse[entity.User](
+	return successResponse(
 		ctx,
 		fiber.StatusOK,
 		user,
