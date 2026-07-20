@@ -46,6 +46,40 @@ func (r *UserRepo) Store(ctx context.Context, user *entity.User) error {
 	return nil
 }
 
+// Batch Store -.
+func (r *UserRepo) BatchStore(ctx context.Context, users []*entity.User) error {
+	if len(users) == 0 {
+		return nil
+	}
+
+	builder := r.Builder.
+		Insert("users").
+		Columns("id, username, email, password_hash, created_at, updated_at")
+
+	for _, user := range users {
+		builder = builder.Values(
+			user.ID,
+			user.Username,
+			user.Email,
+			user.PasswordHash,
+			user.CreatedAt,
+			user.UpdatedAt,
+		)
+	}
+
+	sql, args, err := builder.ToSql()
+	if err != nil {
+		return fmt.Errorf("UserRepo - BatchStore - r.Builder: %w", err)
+	}
+
+	_, err = r.Pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("UserRepo - BatchStore - r.Pool.Exec: %w", err)
+	}
+
+	return nil
+}
+
 // GetByID -.
 func (r *UserRepo) GetByID(ctx context.Context, id string) (entity.User, error) {
 	return r.getUser(ctx, "id", id)
