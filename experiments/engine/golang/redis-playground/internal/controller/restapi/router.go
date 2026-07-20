@@ -9,6 +9,7 @@ import (
 	"github.com/agusheryanto182/redis-playground/internal/usecase"
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
+	"github.com/agusheryanto182/redis-playground/pkg/ratelimiter"
 	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
@@ -25,7 +26,7 @@ import (
 //	@securityDefinitions.apikey BearerAuth
 //	@in header
 //	@name Authorization
-func NewRouter(app *fiber.App, cfg *config.Config, u usecase.User, p usecase.Product, jwtManager *jwt.Manager, l logger.Interface) {
+func NewRouter(app *fiber.App, cfg *config.Config, u usecase.User, p usecase.Product, jwtManager *jwt.Manager, l logger.Interface, limiter *ratelimiter.Limiter) {
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
@@ -48,6 +49,6 @@ func NewRouter(app *fiber.App, cfg *config.Config, u usecase.User, p usecase.Pro
 	// Routers
 	apiV1Group := app.Group("/v1")
 	{
-		v1.NewRoutes(apiV1Group, u, p, jwtManager, l)
+		v1.NewRoutes(apiV1Group, u, p, jwtManager, l, limiter)
 	}
 }

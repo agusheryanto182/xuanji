@@ -1,16 +1,19 @@
 package v1
 
 import (
+	"time"
+
 	"github.com/agusheryanto182/redis-playground/internal/controller/restapi/middleware"
 	"github.com/agusheryanto182/redis-playground/internal/usecase"
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
+	"github.com/agusheryanto182/redis-playground/pkg/ratelimiter"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 // NewRoutes -.
-func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtManager *jwt.Manager, l logger.Interface) {
+func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtManager *jwt.Manager, l logger.Interface, limiter *ratelimiter.Limiter) {
 	r := &V1{u: u, p: p, l: l, v: validator.New(validator.WithRequiredStructEnabled())}
 
 	// Public routes
@@ -30,7 +33,20 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtMa
 
 	userGroup := protected.Group("/user")
 	{
-		userGroup.Get("/profile", r.profile)
+		userGroup.Get(
+			"/profile",
+			limiter.Middleware(
+				ratelimiter.Config{
+					Namespace:   "profile",
+					MaxRequests: 1,
+					Window:      time.Second * 10,
+				},
+				func(c *fiber.Ctx) string {
+					return middleware.GetUserID(c)
+				},
+			),
+			r.profile,
+		)
 	}
 
 	// Product routes

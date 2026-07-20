@@ -40,3 +40,12 @@ func Auth(jwtManager *jwt.Manager) func(*fiber.Ctx) error {
 		return ctx.Next()
 	}
 }
+
+func GetUserID(ctx *fiber.Ctx) string {
+	userID, ok := ctx.Locals("userID").(string)
+	if !ok {
+		return ""
+	}
+
+	return userID
+}

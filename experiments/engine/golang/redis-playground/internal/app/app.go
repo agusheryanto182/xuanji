@@ -16,6 +16,7 @@ import (
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	"github.com/agusheryanto182/redis-playground/pkg/logger"
 	"github.com/agusheryanto182/redis-playground/pkg/postgres"
+	"github.com/agusheryanto182/redis-playground/pkg/ratelimiter"
 	"github.com/agusheryanto182/redis-playground/pkg/redis"
 	"github.com/jackc/pgx/v5/tracelog"
 	goredis "github.com/redis/go-redis/v9"
@@ -49,10 +50,10 @@ func initUseCases(pg *postgres.Postgres, rdb *goredis.Client, jwtManager *jwt.Ma
 	}
 }
 
-func initServers(cfg *config.Config, uc useCases, jwtManager *jwt.Manager, l logger.Interface) servers {
+func initServers(cfg *config.Config, uc useCases, jwtManager *jwt.Manager, l logger.Interface, limiter *ratelimiter.Limiter) servers {
 	// HTTP Server
 	httpServer := httpserver.New(l, httpserver.Port(cfg.HTTP.Port), httpserver.Prefork(cfg.HTTP.UsePreforkMode))
-	restapi.NewRouter(httpServer.App, cfg, uc.user, uc.product, jwtManager, l)
+	restapi.NewRouter(httpServer.App, cfg, uc.user, uc.product, jwtManager, l, limiter)
 
 	return servers{
 		http: httpServer,
@@ -121,8 +122,11 @@ func Run(cfg *config.Config) {
 	// JWT
 	jwtManager := jwt.New(cfg.JWT.Secret, cfg.JWT.TokenExpiry)
 
+	// ratelimiter
+	limiter := ratelimiter.New(rdb)
+
 	uc := initUseCases(pg, rdb, jwtManager, l)
-	s := initServers(cfg, uc, jwtManager, l)
+	s := initServers(cfg, uc, jwtManager, l, limiter)
 	s.startServers()
 	s.waitForShutdown(l)
 }
