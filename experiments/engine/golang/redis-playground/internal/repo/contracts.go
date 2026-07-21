@@ -30,4 +30,23 @@ type (
 		Patch(ctx context.Context, id uuid.UUID, updates map[string]any) error
 		Delete(ctx context.Context, id string) error
 	}
+
+	// ProductCache -.
+	ProductCache interface {
+		GetAll(
+			ctx context.Context,
+			limit,
+			offset int,
+		) ([]*entity.Product, int, error)
+
+		SetAll(
+			ctx context.Context,
+			limit,
+			offset int,
+			products []*entity.Product,
+			total int,
+		) error
+
+		Invalidate(ctx context.Context) error
+	}
 )

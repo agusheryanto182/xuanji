@@ -8,19 +8,21 @@ import (
 	"github.com/agusheryanto182/redis-playground/internal/usecase/product"
 	gomock "github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func newProductUseCase(t *testing.T) (*product.UseCase, *MockProductRepo, *MockInterface) {
+func newProductUseCase(t *testing.T) (*product.UseCase, *MockProductRepo, *MockInterface, *MockProductCache) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
 	repo := NewMockProductRepo(ctrl)
+	cache := NewMockProductCache(ctrl)
 	l := NewMockInterface(ctrl)
-	useCase := product.New(repo, nil, l)
+	useCase := product.New(repo, cache, l)
 
-	return useCase, repo, l
+	return useCase, repo, l, cache
 }
 
 func TestStore(t *testing.T) {
@@ -29,8 +31,12 @@ func TestStore(t *testing.T) {
 	t.Run("store success", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, _ := newProductUseCase(t)
+		uc, repo, _, cache := newProductUseCase(t)
 		repo.EXPECT().Store(context.Background(), gomock.Any()).Return(nil)
+
+		cache.EXPECT().
+			Invalidate(gomock.Any()).
+			Times(1)
 
 		p, err := uc.Store(context.Background(), &entity.Product{
 			Name:        "Test Product",
@@ -54,7 +60,7 @@ func TestStore(t *testing.T) {
 	t.Run("store failed", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, logger := newProductUseCase(t)
+		uc, repo, logger, _ := newProductUseCase(t)
 
 		logger.EXPECT().
 			Error(gomock.Any()).
@@ -82,7 +88,7 @@ func TestGetByID(t *testing.T) {
 	t.Run("get by id success", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, _ := newProductUseCase(t)
+		uc, repo, _, _ := newProductUseCase(t)
 
 		repo.EXPECT().
 			GetByID(context.Background(), productID).
@@ -109,9 +115,13 @@ func TestUpdate(t *testing.T) {
 	t.Run("full update success", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, _ := newProductUseCase(t)
+		uc, repo, _, cache := newProductUseCase(t)
 
 		repo.EXPECT().Update(context.Background(), gomock.Any()).Return(nil)
+
+		cache.EXPECT().
+			Invalidate(gomock.Any()).
+			Times(1)
 
 		updated, err := uc.Update(context.Background(), &entity.Product{
 			ID:          uuid.New(),
@@ -135,7 +145,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("error - product not found", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, _ := newProductUseCase(t)
+		uc, repo, _, _ := newProductUseCase(t)
 		expectedError := entity.ErrProductNotFound
 
 		repo.EXPECT().Update(context.Background(), gomock.Any()).Return(expectedError)
@@ -157,10 +167,54 @@ func TestUpdate(t *testing.T) {
 func TestGetAll(t *testing.T) {
 	t.Parallel()
 
-	t.Run("get success", func(t *testing.T) {
+	t.Run("get success with cache", func(t *testing.T) {
 		t.Parallel()
 
-		uc, repo, _ := newProductUseCase(t)
+		uc, _, _, cache := newProductUseCase(t)
+
+		cache.EXPECT().
+			GetAll(context.Background(), 15, 0).
+			Return([]*entity.Product{
+				{
+					Name:        "Test Product 1",
+					Description: "This is a test product 1",
+					Price:       999.99,
+					Stock:       10,
+				},
+				{
+					Name:        "Test Product 2",
+					Description: "This is a test product 2",
+					Price:       999.99,
+					Stock:       10,
+				},
+				{
+					Name:        "Test Product 3",
+					Description: "This is a test product 3",
+					Price:       999.99,
+					Stock:       10,
+				},
+			}, 3, nil)
+
+		products, meta, err := uc.GetAll(context.Background(), 15, 0)
+
+		require.NoError(t, err)
+
+		assert.Len(t, products, 3)
+		assert.Equal(t, meta, 3)
+		assert.Equal(t, "Test Product 1", products[0].Name)
+		assert.Equal(t, "This is a test product 1", products[0].Description)
+		assert.Equal(t, 999.99, products[0].Price)
+		assert.Equal(t, 10, products[0].Stock)
+	})
+
+	t.Run("get success without cache", func(t *testing.T) {
+		t.Parallel()
+
+		uc, repo, _, cache := newProductUseCase(t)
+
+		cache.EXPECT().
+			GetAll(context.Background(), 15, 0).
+			Return(nil, 0, redis.Nil)
 
 		repo.EXPECT().GetAll(context.Background(), 15, 0).Return([]*entity.Product{
 			{
@@ -184,6 +238,10 @@ func TestGetAll(t *testing.T) {
 		}, nil)
 
 		repo.EXPECT().CountProducts(context.Background()).Return(3, nil)
+
+		cache.EXPECT().
+			SetAll(context.Background(), 15, 0, gomock.Any(), 3).
+			Return(nil)
 
 		products, meta, err := uc.GetAll(context.Background(), 15, 0)
 

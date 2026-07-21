@@ -43,10 +43,11 @@ var pgxLevels = map[string]tracelog.LogLevel{
 func initUseCases(pg *postgres.Postgres, rdb *goredis.Client, jwtManager *jwt.Manager, l logger.Interface) useCases {
 	userRepo := persistent.NewUserRepo(pg)
 	productRepo := persistent.NewProductRepo(pg)
+	productCache := persistent.NewProductRedis(rdb)
 
 	return useCases{
 		user:    user.New(userRepo, jwtManager),
-		product: product.New(productRepo, rdb, l),
+		product: product.New(productRepo, productCache, l),
 	}
 }
 

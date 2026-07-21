@@ -231,3 +231,70 @@ func (mr *MockProductRepoMockRecorder) Update(ctx, product interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProductRepo)(nil).Update), ctx, product)
 }
+
+// MockProductCache is a mock of ProductCache interface.
+type MockProductCache struct {
+	ctrl     *gomock.Controller
+	recorder *MockProductCacheMockRecorder
+}
+
+// MockProductCacheMockRecorder is the mock recorder for MockProductCache.
+type MockProductCacheMockRecorder struct {
+	mock *MockProductCache
+}
+
+// NewMockProductCache creates a new mock instance.
+func NewMockProductCache(ctrl *gomock.Controller) *MockProductCache {
+	mock := &MockProductCache{ctrl: ctrl}
+	mock.recorder = &MockProductCacheMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockProductCache) EXPECT() *MockProductCacheMockRecorder {
+	return m.recorder
+}
+
+// GetAll mocks base method.
+func (m *MockProductCache) GetAll(ctx context.Context, limit, offset int) ([]*entity.Product, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret0, _ := ret[0].([]*entity.Product)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockProductCacheMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockProductCache)(nil).GetAll), ctx, limit, offset)
+}
+
+// Invalidate mocks base method.
+func (m *MockProductCache) Invalidate(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Invalidate", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Invalidate indicates an expected call of Invalidate.
+func (mr *MockProductCacheMockRecorder) Invalidate(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Invalidate", reflect.TypeOf((*MockProductCache)(nil).Invalidate), ctx)
+}
+
+// SetAll mocks base method.
+func (m *MockProductCache) SetAll(ctx context.Context, limit, offset int, products []*entity.Product, total int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetAll", ctx, limit, offset, products, total)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetAll indicates an expected call of SetAll.
+func (mr *MockProductCacheMockRecorder) SetAll(ctx, limit, offset, products, total interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAll", reflect.TypeOf((*MockProductCache)(nil).SetAll), ctx, limit, offset, products, total)
+}
