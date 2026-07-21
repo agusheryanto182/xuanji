@@ -10,7 +10,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-func newUserSeeder(t *testing.T) (*seed.UserSeeder, *MockUserRepo) {
+func newUserSeeder(t *testing.T) (*seed.UserSeeder, *MockUserRepo, *MockInterface) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
@@ -20,25 +20,29 @@ func newUserSeeder(t *testing.T) (*seed.UserSeeder, *MockUserRepo) {
 	repo := NewMockUserRepo(ctrl)
 	seeder := seed.NewUserSeeder(repo, l)
 
-	return seeder, repo
+	return seeder, repo, l
 }
 
 func TestUserSeeder_Seed(t *testing.T) {
 	t.Run("seed success", func(t *testing.T) {
-		seeder, repo := newUserSeeder(t)
+		seeder, repo, l := newUserSeeder(t)
+
+		l.EXPECT().
+			Info(gomock.Any(), gomock.Any()).Times(1)
+
 		repo.EXPECT().
-			Store(gomock.Any(), gomock.AssignableToTypeOf(&entity.User{})).
-			DoAndReturn(func(ctx context.Context, user *entity.User) error {
-				if user.Username != "suga" {
+			BatchStore(gomock.Any(), gomock.AssignableToTypeOf([]*entity.User{})).
+			DoAndReturn(func(ctx context.Context, users []*entity.User) error {
+				if len(users) != 1000 {
+					t.Errorf("expected 1000 users, got %v", len(users))
+				}
+
+				if users[0].Username != "user 1" {
 					t.Errorf("unexpected username")
 				}
 
-				if user.Email != "suga@example.com" {
+				if users[0].Email != "user1@example.com" {
 					t.Errorf("unexpected email")
-				}
-
-				if user.ID == "" {
-					t.Error("id should not be empty")
 				}
 
 				return nil
@@ -55,12 +59,15 @@ func TestUserSeeder_Seed(t *testing.T) {
 }
 
 func TestUserSeeder_StoreError(t *testing.T) {
-	seeder, repo := newUserSeeder(t)
+	seeder, repo, l := newUserSeeder(t)
 
 	expected := errors.New("db error")
 
+	l.EXPECT().
+		Error(gomock.Any(), gomock.Any()).Times(1)
+
 	repo.EXPECT().
-		Store(gomock.Any(), gomock.Any()).
+		BatchStore(gomock.Any(), gomock.Any()).
 		Return(expected)
 
 	err := seeder.Seed(context.Background())
