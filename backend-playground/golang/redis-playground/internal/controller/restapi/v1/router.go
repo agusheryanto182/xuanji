@@ -39,7 +39,7 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtMa
 				ratelimiter.Config{
 					Namespace:   "profile",
 					MaxRequests: 1,
-					Window:      time.Second * 10,
+					Window:      time.Second * 1,
 				},
 				func(c *fiber.Ctx) string {
 					return middleware.GetUserID(c)

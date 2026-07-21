@@ -93,10 +93,13 @@ func (r *V1) login(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusInternalServerError, response.ErrInternal, entity.ErrInternalServerError.Error())
 	}
 
+	var resToken response.Token
+	resToken.Token = token
+
 	return successResponse(
 		ctx,
 		fiber.StatusOK,
-		token,
+		resToken,
 		nil,
 	)
 }
