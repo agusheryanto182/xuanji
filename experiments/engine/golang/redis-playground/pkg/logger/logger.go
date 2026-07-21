@@ -29,6 +29,8 @@ func New(level string) *Logger {
 	var l zerolog.Level
 
 	switch strings.ToLower(level) {
+	case "disabled":
+		l = zerolog.Disabled
 	case "error":
 		l = zerolog.ErrorLevel
 	case "warn":

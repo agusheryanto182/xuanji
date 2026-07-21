@@ -23,6 +23,11 @@ export const options = {
 export default function () {
   const res = http.get(`${BASE_URL}/v1/product`);
 
+  if (res.status !== 200) {
+    const json = JSON.parse(res.body);
+    console.log("ERROR: " + JSON.stringify(json, null, 2));
+  }
+
   productDuration.add(res.timings.duration);
 
   check(res, {
