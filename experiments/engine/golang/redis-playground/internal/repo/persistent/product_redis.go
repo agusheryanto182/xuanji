@@ -2,10 +2,11 @@ package persistent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"github.com/agusheryanto182/redis-playground/internal/entity"
 	"github.com/agusheryanto182/redis-playground/internal/repo"
