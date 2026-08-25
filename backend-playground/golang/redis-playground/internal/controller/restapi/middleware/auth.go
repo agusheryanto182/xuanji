@@ -30,7 +30,7 @@ func Auth(jwtManager *jwt.Manager) func(*fiber.Ctx) error {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(errorResponse{Status: "error", Code: response.ErrInvalidAuthorizationHeader, Message: entity.ErrInvalidAuthorizationHeader.Error()})
 		}
 
-		userID, err := jwtManager.ParseToken(parts[1])
+		userID, err := jwtManager.ParseToken(ctx.Context(), parts[1])
 		if err != nil {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(errorResponse{Status: "error", Code: response.ErrInvalidOrExpiredToken, Message: entity.ErrInvalidOrExpiredToken.Error()})
 		}

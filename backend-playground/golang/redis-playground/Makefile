@@ -146,6 +146,19 @@ test: ## Run unit tests
 	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/... ./pkg/...
 .PHONY: test
 
+test-file: ## Run tests from a specific test file (example: make test-file FILE=./internal/usecase/user_test.go)
+	@PACKAGE=$$(dirname "$(FILE)"); \
+	TESTS=$$(grep -E '^func Test[[:alnum:]_]+\(' "$(FILE)" | \
+		sed -E 's/^func (Test[[:alnum:]_]+)\(.*/\1/' | \
+		paste -sd'|' -); \
+	if [ -z "$$TESTS" ]; then \
+		echo "No test functions found in $(FILE)"; \
+		exit 1; \
+	fi; \
+	echo "Running tests from $(FILE)..."; \
+	go test -v "./$$PACKAGE" -run "^($$TESTS)$$"
+.PHONY: test-file
+
 integration-test: ## Run integration tests
 	go clean -testcache
 	go test -v ./integration-test/...

@@ -64,7 +64,7 @@ func (uc *UseCase) Login(ctx context.Context, email, password string) (string, e
 		return "", entity.ErrInvalidCredentials
 	}
 
-	token, err := uc.jwt.GenerateToken(user.ID)
+	token, err := uc.jwt.GenerateToken(ctx, user.ID)
 	if err != nil {
 		return "", fmt.Errorf("UserUseCase - Login - uc.jwt.GenerateToken: %w", err)
 	}

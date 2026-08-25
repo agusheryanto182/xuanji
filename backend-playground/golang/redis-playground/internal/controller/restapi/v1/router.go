@@ -22,11 +22,6 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtMa
 		authGroup.Post("/register", r.register)
 		authGroup.Post("/login", r.login)
 	}
-	// Product routes
-	{
-		apiV1Group.Get("/product", r.GetAll)
-		apiV1Group.Get("/product/:id", r.GetByID)
-	}
 
 	// Protected routes
 	protected := apiV1Group.Group("", middleware.Auth(jwtManager))
@@ -53,6 +48,8 @@ func NewRoutes(apiV1Group fiber.Router, u usecase.User, p usecase.Product, jwtMa
 	productGroup := protected.Group("/product")
 	{
 		productGroup.Post("", r.Store)
+		productGroup.Get("", r.GetAll)
+		productGroup.Get("/:id", r.GetByID)
 		productGroup.Put("/:id", r.Update)
 		productGroup.Patch("/:id", r.Patch)
 		productGroup.Delete("/:id", r.Delete)

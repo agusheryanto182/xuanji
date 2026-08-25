@@ -10,6 +10,7 @@ import (
 	"github.com/agusheryanto182/redis-playground/internal/usecase/user"
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	gomock "github.com/golang/mock/gomock"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
@@ -23,7 +24,22 @@ func newUserUseCase(t *testing.T) (*user.UseCase, *MockUserRepo) {
 	ctrl := gomock.NewController(t)
 
 	repo := NewMockUserRepo(ctrl)
-	jwtManager := jwt.New("test-secret", time.Hour)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+
+	require.NoError(t, redisClient.Ping(context.Background()).Err())
+
+	t.Cleanup(func() {
+		require.NoError(t, redisClient.Close())
+	})
+
+	jwtManager := jwt.New(
+		"test-secret",
+		time.Hour,
+		redisClient,
+	)
+
 	useCase := user.New(repo, jwtManager)
 
 	return useCase, repo

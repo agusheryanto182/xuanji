@@ -121,7 +121,7 @@ func Run(cfg *config.Config) {
 	}
 
 	// JWT
-	jwtManager := jwt.New(cfg.JWT.Secret, cfg.JWT.TokenExpiry)
+	jwtManager := jwt.New(cfg.JWT.Secret, cfg.JWT.TokenExpiry, rdb)
 
 	// ratelimiter
 	limiter := ratelimiter.New(rdb)

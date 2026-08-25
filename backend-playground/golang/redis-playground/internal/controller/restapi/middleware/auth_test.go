@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,7 @@ import (
 	"github.com/agusheryanto182/redis-playground/internal/controller/restapi/middleware"
 	"github.com/agusheryanto182/redis-playground/pkg/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +19,17 @@ import (
 func newTestApp(t *testing.T) (*fiber.App, *jwt.Manager) {
 	t.Helper()
 
-	jwtManager := jwt.New("test-secret", time.Hour)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+
+	require.NoError(t, redisClient.Ping(context.Background()).Err())
+
+	t.Cleanup(func() {
+		require.NoError(t, redisClient.Close())
+	})
+
+	jwtManager := jwt.New("test-secret", time.Hour, redisClient)
 
 	app := fiber.New()
 	app.Use(middleware.Auth(jwtManager))
@@ -38,7 +50,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 	app, jwtManager := newTestApp(t)
 
-	validToken, err := jwtManager.GenerateToken("user-id-123")
+	validToken, err := jwtManager.GenerateToken(t.Context(), "user-id-123")
 	require.NoError(t, err)
 
 	tests := []struct {
