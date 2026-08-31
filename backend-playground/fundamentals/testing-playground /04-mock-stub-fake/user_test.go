@@ -1,4 +1,4 @@
-package mockStubFake
+package mockstubfake
 
 import (
 	"errors"

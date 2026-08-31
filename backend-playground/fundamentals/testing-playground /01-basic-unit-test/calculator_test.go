@@ -1,4 +1,4 @@
-package basicUnitTest
+package basicunittest
 
 import "testing"
 

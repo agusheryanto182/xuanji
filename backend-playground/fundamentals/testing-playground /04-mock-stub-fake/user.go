@@ -1,4 +1,4 @@
-package mockStubFake
+package mockstubfake
 
 type User struct {
 	ID   int
