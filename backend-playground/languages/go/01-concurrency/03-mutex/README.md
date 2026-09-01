@@ -1,27 +1,38 @@
-# Goroutine
+# Mutex
 
-This playground demonstrates the basic use of goroutines in Go.
+This playground demonstrates how `sync.Mutex` protects shared mutable data from a race condition.
 
 ## Goal
 
-Understand the difference between sequential execution and concurrent execution.
+Fix the race condition from the previous exercise.
 
 ```text
-Without goroutine:
+Without Mutex:
 
-say hello
-   ↓
-finish
-   ↓
-say world
+Goroutine A ──→ counter ←── Goroutine B
+                    ↑
+               unsafe access
 ```
 
-With goroutines:
+With a mutex:
 
 ```text
-        ┌── say hello
-main ───┤
-        └── say world
+Goroutine
+    ↓
+  Lock
+    ↓
+counter++
+    ↓
+ Unlock
+```
+
+## Structure
+
+```text
+03-mutex/
+├── README.md
+├── go.mod
+└── main.go
 ```
 
 ## Setup
@@ -29,10 +40,7 @@ main ───┤
 This playground is isolated and has its own Go module.
 
 ```bash
-mkdir -p languages/go/01-concurrency
-cd languages/go/01-concurrency
-
-go mod init concurrency-playground
+go mod init mutex-playground
 ```
 
 ## Practice
@@ -44,126 +52,200 @@ package main
 
 import (
     "fmt"
-    "time"
+    "sync"
 )
 
-func say(message string) {
-    for i := 0; i < 3; i++ {
-        fmt.Println(message, i)
-        time.Sleep(100 * time.Millisecond)
-    }
-}
-
 func main() {
-    go say("hello")
-    go say("world")
+    var counter int
+    var mu sync.Mutex
+    var wg sync.WaitGroup
 
-    time.Sleep(time.Second)
+    for i := 0; i < 1000; i++ {
+        wg.Add(1)
+
+        go func() {
+            defer wg.Done()
+
+            mu.Lock()
+            counter++
+            mu.Unlock()
+        }()
+    }
+
+    wg.Wait()
+
+    fmt.Println("counter:", counter)
 }
 ```
 
-Run:
+## Run
 
 ```bash
 go run .
 ```
 
-The output order can vary:
+Expected:
 
 ```text
-hello 0
-world 0
-world 1
-hello 1
-hello 2
-world 2
+counter: 1000
 ```
 
-Another run may produce a different order.
-
-## Sequential Version
-
-Remove `go`:
-
-```go
-say("hello")
-say("world")
-```
-
-Run:
+Run with the race detector:
 
 ```bash
-go run .
+go run -race .
 ```
 
-The output will be sequential:
+There should be no:
 
 ```text
-hello 0
-hello 1
-hello 2
-world 0
-world 1
-world 2
+WARNING: DATA RACE
 ```
 
-## Why Does the Order Change?
+## What Does the Mutex Do?
 
-With:
+The critical section is:
 
 ```go
-go say("hello")
-go say("world")
+mu.Lock()
+counter++
+mu.Unlock()
 ```
 
-both functions run as goroutines.
+`Lock()` prevents another goroutine from entering the protected section at the same time.
 
-The Go runtime scheduler determines when each goroutine gets execution time, so the exact output order is not guaranteed.
+```text
+Goroutine A
+    ↓
+  Lock 🔒
+    ↓
+counter++
+    ↓
+ Unlock 🔓
+```
 
-## Important
+If another goroutine tries to lock while A owns the mutex:
 
-This playground uses:
+```text
+Goroutine B
+    ↓
+  Lock 🔒
+    ↓
+   WAIT
+```
+
+After A unlocks:
+
+```text
+A → Unlock
+      ↓
+B → Lock
+      ↓
+B → counter++
+```
+
+This protects the shared variable.
+
+## Why the Race Disappears
+
+Before:
+
+```text
+Goroutine A ──┐
+Goroutine B ──┼──→ counter
+Goroutine C ──┘
+```
+
+All goroutines could modify `counter` at the same time.
+
+With a mutex:
+
+```text
+Goroutine A
+    ↓
+   Lock
+    ↓
+ counter++
+    ↓
+  Unlock
+```
+
+Only one goroutine can modify the protected state at a time.
+
+## Defer Unlock
+
+A common pattern is:
 
 ```go
-time.Sleep(time.Second)
+mu.Lock()
+defer mu.Unlock()
+
+counter++
 ```
 
-only to keep the main function alive long enough to observe the goroutines.
+This ensures the mutex is unlocked when the surrounding function returns.
 
-Do not use `time.Sleep` as a synchronization mechanism in production code.
+For this exercise, explicit `Lock()` / `Unlock()` is used first because it makes the synchronization flow easier to see.
 
-Later, synchronization tools such as `WaitGroup`, channels, and context will be used for proper goroutine lifecycle management.
+## Practice: Reproduce the Race
+
+Temporarily remove:
+
+```go
+mu.Lock()
+mu.Unlock()
+```
+
+and leave:
+
+```go
+counter++
+```
+
+Then run:
+
+```bash
+go run -race .
+```
+
+The race detector should report a data race again.
+
+Restore the mutex and run:
+
+```bash
+go run -race .
+```
+
+The warning should disappear.
 
 ## Key Takeaway
 
-A goroutine is started with the `go` keyword:
-
-```go
-go say("hello")
+```text
+Shared mutable data
+        +
+Multiple goroutines
+        +
+No synchronization
+        ↓
+Data Race
 ```
 
-The important distinction is:
+A mutex protects the critical section:
 
 ```text
-Sequential
-    ↓
-function A finishes
-    ↓
-function B starts
-
-Concurrent
-    ↓
-function A and B can make progress independently
+Lock
+ ↓
+Critical Section
+ ↓
+Unlock
 ```
 
-This is the foundation for the next topics:
+Use `sync.Mutex` when multiple goroutines need safe access to shared mutable state.
+
+Next:
 
 ```text
-Goroutine
-   ↓
-Race Condition
-   ↓
-Synchronization
-   ↓
-Mutex / Channel
+Mutex
+  ↓
+Channel
 ```
