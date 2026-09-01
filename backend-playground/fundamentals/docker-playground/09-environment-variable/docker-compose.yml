@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    environment:
+      APP_ENV: ${APP_ENV}
+      DB_HOST: ${DB_HOST}
+      REDIS_HOST: ${REDIS_HOST}
+    ports:
+      - "8080:8080"
