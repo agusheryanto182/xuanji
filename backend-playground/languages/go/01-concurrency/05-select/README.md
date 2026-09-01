@@ -1,27 +1,32 @@
-# Goroutine
+# Select
 
-This playground demonstrates the basic use of goroutines in Go.
+This playground demonstrates Go's `select` statement for waiting on multiple channel operations.
 
 ## Goal
 
-Understand the difference between sequential execution and concurrent execution.
+Understand how one goroutine can wait for multiple channel operations and continue when one becomes ready.
 
 ```text
-Without goroutine:
-
-say hello
-   ↓
-finish
-   ↓
-say world
+              select
+             /      \
+            ↓        ↓
+          ch1       ch2
+            │        │
+            ↓        ↓
+         ready?    ready?
+            │        │
+            └───┬────┘
+                ↓
+           first ready
 ```
 
-With goroutines:
+## Structure
 
 ```text
-        ┌── say hello
-main ───┤
-        └── say world
+05-select/
+├── README.md
+├── go.mod
+└── main.go
 ```
 
 ## Setup
@@ -29,10 +34,7 @@ main ───┤
 This playground is isolated and has its own Go module.
 
 ```bash
-mkdir -p languages/go/01-concurrency
-cd languages/go/01-concurrency
-
-go mod init concurrency-playground
+go mod init select-playground
 ```
 
 ## Practice
@@ -47,19 +49,28 @@ import (
     "time"
 )
 
-func say(message string) {
-    for i := 0; i < 3; i++ {
-        fmt.Println(message, i)
-        time.Sleep(100 * time.Millisecond)
+func main() {
+    ch1 := make(chan string)
+    ch2 := make(chan string)
+
+    go func() {
+        time.Sleep(1 * time.Second)
+        ch1 <- "message from ch1"
+    }()
+
+    go func() {
+        time.Sleep(2 * time.Second)
+        ch2 <- "message from ch2"
+    }()
+
+    select {
+    case message := <-ch1:
+        fmt.Println(message)
+
+    case message := <-ch2:
+        fmt.Println(message)
     }
 }
-
-func main() {
-    go say("hello")
-    go say("world")
-
-    time.Sleep(time.Second)
-}
 ```
 
 Run:
@@ -68,102 +79,121 @@ Run:
 go run .
 ```
 
-The output order can vary:
+Expected:
 
 ```text
-hello 0
-world 0
-world 1
-hello 1
-hello 2
-world 2
+message from ch1
 ```
 
-Another run may produce a different order.
+## How `select` Works
 
-## Sequential Version
-
-Remove `go`:
+Without `select`:
 
 ```go
-say("hello")
-say("world")
+message := <-ch1
 ```
 
-Run:
-
-```bash
-go run .
-```
-
-The output will be sequential:
-
-```text
-hello 0
-hello 1
-hello 2
-world 0
-world 1
-world 2
-```
-
-## Why Does the Order Change?
+the goroutine waits specifically for `ch1`.
 
 With:
 
 ```go
-go say("hello")
-go say("world")
+select {
+case message := <-ch1:
+    fmt.Println(message)
+
+case message := <-ch2:
+    fmt.Println(message)
+}
 ```
 
-both functions run as goroutines.
+the goroutine waits for either `ch1` or `ch2`.
 
-The Go runtime scheduler determines when each goroutine gets execution time, so the exact output order is not guaranteed.
+Whichever operation becomes ready first is selected.
 
-## Important
+## Multiple Ready Cases
 
-This playground uses:
+If multiple cases are ready at the same time, `select` chooses one of the ready cases pseudo-randomly.
+
+Do not rely on case order to create priority.
+
+## Select With Timeout
+
+A common pattern is:
 
 ```go
-time.Sleep(time.Second)
+select {
+case message := <-ch:
+    fmt.Println(message)
+
+case <-time.After(1 * time.Second):
+    fmt.Println("timeout")
+}
 ```
 
-only to keep the main function alive long enough to observe the goroutines.
+The goroutine waits for either a channel value or the timeout.
 
-Do not use `time.Sleep` as a synchronization mechanism in production code.
+## Important: Select Does Not Wait for All Goroutines
 
-Later, synchronization tools such as `WaitGroup`, channels, and context will be used for proper goroutine lifecycle management.
+When one case is selected, the `select` finishes.
+
+If `main()` then returns:
+
+```text
+main returns
+    ↓
+program exits
+    ↓
+remaining goroutines stop
+```
+
+`select` is not equivalent to `sync.WaitGroup`.
+
+Use `WaitGroup` when the goal is to wait for a group of goroutines to finish.
+
+## `select` vs `WaitGroup`
+
+`select`:
+
+```text
+Wait for one of multiple channel operations
+```
+
+`WaitGroup`:
+
+```text
+Wait for a group of goroutines to finish
+```
+
+They solve different problems.
 
 ## Key Takeaway
 
-A goroutine is started with the `go` keyword:
+`select` allows a goroutine to wait on multiple channel operations:
 
 ```go
-go say("hello")
+select {
+case value := <-ch1:
+    // ch1 ready
+
+case value := <-ch2:
+    // ch2 ready
+}
 ```
 
-The important distinction is:
+It is especially useful for:
 
 ```text
-Sequential
-    ↓
-function A finishes
-    ↓
-function B starts
-
-Concurrent
-    ↓
-function A and B can make progress independently
+multiple channels
+timeouts
+cancellation
+non-blocking channel operations
 ```
 
-This is the foundation for the next topics:
+Next:
 
 ```text
-Goroutine
-   ↓
-Race Condition
-   ↓
-Synchronization
-   ↓
-Mutex / Channel
+Channel + Goroutines
+        ↓
+Worker Pool
 ```
