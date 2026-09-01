@@ -1,27 +1,24 @@
-# Goroutine
+# Channel
 
-This playground demonstrates the basic use of goroutines in Go.
+This playground demonstrates how Go channels allow goroutines to communicate by sending and receiving values.
 
 ## Goal
 
-Understand the difference between sequential execution and concurrent execution.
-
 ```text
-Without goroutine:
-
-say hello
-   ↓
-finish
-   ↓
-say world
+Goroutine
+    ↓
+  channel
+    ↓
+Goroutine / main
 ```
 
-With goroutines:
+## Structure
 
 ```text
-        ┌── say hello
-main ───┤
-        └── say world
+04-channel/
+├── README.md
+├── go.mod
+└── main.go
 ```
 
 ## Setup
@@ -29,10 +26,7 @@ main ───┤
 This playground is isolated and has its own Go module.
 
 ```bash
-mkdir -p languages/go/01-concurrency
-cd languages/go/01-concurrency
-
-go mod init concurrency-playground
+go mod init channel-playground
 ```
 
 ## Practice
@@ -42,23 +36,18 @@ Create `main.go`:
 ```go
 package main
 
-import (
-    "fmt"
-    "time"
-)
-
-func say(message string) {
-    for i := 0; i < 3; i++ {
-        fmt.Println(message, i)
-        time.Sleep(100 * time.Millisecond)
-    }
-}
+import "fmt"
 
 func main() {
-    go say("hello")
-    go say("world")
+    ch := make(chan string)
 
-    time.Sleep(time.Second)
+    go func() {
+        ch <- "hello from goroutine"
+    }()
+
+    message := <-ch
+
+    fmt.Println(message)
 }
 ```
 
@@ -68,102 +57,185 @@ Run:
 go run .
 ```
 
-The output order can vary:
+Expected:
 
 ```text
-hello 0
-world 0
-world 1
-hello 1
-hello 2
-world 2
+hello from goroutine
 ```
 
-Another run may produce a different order.
+## Send and Receive
 
-## Sequential Version
-
-Remove `go`:
+Create a channel:
 
 ```go
-say("hello")
-say("world")
+ch := make(chan string)
 ```
 
-Run:
+Send a value:
 
-```bash
-go run .
+```go
+ch <- "hello"
 ```
 
-The output will be sequential:
+Receive a value:
+
+```go
+message := <-ch
+```
 
 ```text
-hello 0
-hello 1
-hello 2
-world 0
-world 1
-world 2
-```
-
-## Why Does the Order Change?
-
-With:
-
-```go
-go say("hello")
-go say("world")
-```
-
-both functions run as goroutines.
-
-The Go runtime scheduler determines when each goroutine gets execution time, so the exact output order is not guaranteed.
-
-## Important
-
-This playground uses:
-
-```go
-time.Sleep(time.Second)
-```
-
-only to keep the main function alive long enough to observe the goroutines.
-
-Do not use `time.Sleep` as a synchronization mechanism in production code.
-
-Later, synchronization tools such as `WaitGroup`, channels, and context will be used for proper goroutine lifecycle management.
-
-## Key Takeaway
-
-A goroutine is started with the `go` keyword:
-
-```go
-go say("hello")
-```
-
-The important distinction is:
-
-```text
-Sequential
+ch <- value
     ↓
-function A finishes
-    ↓
-function B starts
+send
 
-Concurrent
+value := <-ch
     ↓
-function A and B can make progress independently
+receive
 ```
 
-This is the foundation for the next topics:
+## Communication Flow
 
 ```text
 Goroutine
-   ↓
-Race Condition
-   ↓
-Synchronization
-   ↓
-Mutex / Channel
+    │
+    │ ch <- "hello"
+    ↓
+┌─────────┐
+│ channel │
+└─────────┘
+    │
+    │ <-ch
+    ↓
+  main()
+```
+
+## Integer Example
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    ch := make(chan int)
+
+    go func() {
+        ch <- 42
+    }()
+
+    number := <-ch
+
+    fmt.Println(number)
+}
+```
+
+Expected:
+
+```text
+42
+```
+
+## Unbuffered Channel
+
+This:
+
+```go
+ch := make(chan string)
+```
+
+creates an unbuffered channel.
+
+A send blocks until another goroutine is ready to receive.
+
+```text
+Sender
+  │
+  │ ch <- value
+  ↓
+ waits
+  │
+  ↓
+Receiver
+  │
+  │ <-ch
+  ↓
+continues
+```
+
+This synchronization behavior is an important property of channels.
+
+## Deadlock Example
+
+This code can deadlock:
+
+```go
+ch := make(chan string)
+
+ch <- "hello"
+
+fmt.Println(<-ch)
+```
+
+There is no separate receiver ready when the send occurs.
+
+The runtime may report:
+
+```text
+fatal error: all goroutines are asleep - deadlock!
+```
+
+## Mutex vs Channel
+
+Mutex:
+
+```text
+Shared State
+    ↓
+  Mutex
+    ↓
+Protect Access
+```
+
+Channel:
+
+```text
+Goroutine A
+    ↓
+  Channel
+    ↓
+Goroutine B
+```
+
+Use a mutex when the main problem is protecting shared mutable state.
+
+Use a channel when goroutines need to communicate or transfer data.
+
+## Key Takeaway
+
+A channel provides communication between goroutines.
+
+```text
+Send:
+ch <- value
+
+Receive:
+value := <-ch
+```
+
+Basic pattern:
+
+```text
+Goroutine
+    ↓
+  Channel
+    ↓
+Goroutine
+```
+
+Next:
+
+```text
+Channel
+  ↓
+Buffered Channel / Select
 ```
