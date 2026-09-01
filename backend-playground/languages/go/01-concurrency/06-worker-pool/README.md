@@ -1,38 +1,40 @@
-# Goroutine
+# Worker Pool
 
-This playground demonstrates the basic use of goroutines in Go.
+This playground demonstrates the worker pool pattern in Go using goroutines, channels, and `sync.WaitGroup`.
 
 ## Goal
 
-Understand the difference between sequential execution and concurrent execution.
+Process many jobs with a limited number of concurrent workers.
 
 ```text
-Without goroutine:
-
-say hello
-   ↓
-finish
-   ↓
-say world
+                  Producer
+                     │
+                     ↓
+             ┌──────────────┐
+             │ Job Channel  │
+             │ 1 2 3 4 5 ...│
+             └──────┬───────┘
+                    │
+          ┌─────────┼─────────┐
+          ↓         ↓         ↓
+       Worker 1  Worker 2  Worker 3
 ```
 
-With goroutines:
+The goal is not to create one goroutine per job, but to limit the number of jobs being processed concurrently.
+
+## Structure
 
 ```text
-        ┌── say hello
-main ───┤
-        └── say world
+06-worker-pool/
+├── README.md
+├── go.mod
+└── main.go
 ```
 
 ## Setup
 
-This playground is isolated and has its own Go module.
-
 ```bash
-mkdir -p languages/go/01-concurrency
-cd languages/go/01-concurrency
-
-go mod init concurrency-playground
+go mod init worker-pool-playground
 ```
 
 ## Practice
@@ -44,21 +46,38 @@ package main
 
 import (
     "fmt"
+    "sync"
     "time"
 )
 
-func say(message string) {
-    for i := 0; i < 3; i++ {
-        fmt.Println(message, i)
-        time.Sleep(100 * time.Millisecond)
+func worker(id int, jobs <-chan int, wg *sync.WaitGroup) {
+    defer wg.Done()
+
+    for job := range jobs {
+        fmt.Printf("worker %d processing job %d\n", id, job)
+        time.Sleep(500 * time.Millisecond)
     }
 }
 
 func main() {
-    go say("hello")
-    go say("world")
+    jobs := make(chan int, 5)
 
-    time.Sleep(time.Second)
+    var wg sync.WaitGroup
+
+    for i := 1; i <= 3; i++ {
+        wg.Add(1)
+        go worker(i, jobs, &wg)
+    }
+
+    for i := 1; i <= 10; i++ {
+        jobs <- i
+    }
+
+    close(jobs)
+
+    wg.Wait()
+
+    fmt.Println("all jobs completed")
 }
 ```
 
@@ -68,102 +87,229 @@ Run:
 go run .
 ```
 
-The output order can vary:
+The output order is not guaranteed because workers run concurrently.
+
+## How It Works
+
+There are:
 
 ```text
-hello 0
-world 0
-world 1
-hello 1
-hello 2
-world 2
+10 jobs
+3 workers
 ```
 
-Another run may produce a different order.
-
-## Sequential Version
-
-Remove `go`:
+Jobs are sent to the shared channel:
 
 ```go
-say("hello")
-say("world")
+jobs <- job
 ```
 
-Run:
+Workers consume jobs:
+
+```go
+for job := range jobs {
+    // process job
+}
+```
+
+Architecture:
+
+```text
+             10 Jobs
+                │
+                ↓
+        ┌───────────────┐
+        │ jobs channel  │
+        └───────┬───────┘
+                │
+       ┌────────┼────────┐
+       ↓        ↓        ↓
+      W1       W2       W3
+```
+
+Each job is received and processed by one worker.
+
+## Why Use a Worker Pool?
+
+Suppose there are:
+
+```text
+10,000 jobs
+```
+
+Instead of:
+
+```text
+10,000 jobs
+      ↓
+10,000 goroutines
+```
+
+we can use:
+
+```text
+10,000 jobs
+      ↓
+   Job Queue
+      ↓
+10 workers
+```
+
+This explicitly limits concurrency.
+
+For example:
+
+```text
+10000 jobs
+5 workers
+```
+
+means at most 5 jobs are being processed concurrently by this worker pool.
+
+## Why Use a Channel?
+
+The channel acts as the job queue:
+
+```go
+jobs := make(chan int, 5)
+```
+
+Producer:
+
+```go
+jobs <- job
+```
+
+Worker:
+
+```go
+job := <-jobs
+```
+
+Multiple workers can receive from the same channel.
+
+## Why Is the Channel Buffered?
+
+This example uses:
+
+```go
+jobs := make(chan int, 5)
+```
+
+The buffer can temporarily hold up to 5 jobs.
+
+A worker pool does not require a buffered channel. This is also valid:
+
+```go
+jobs := make(chan int)
+```
+
+The difference is that an unbuffered channel requires sender and receiver synchronization for each send, while a buffered channel can queue values while capacity remains available.
+
+## Why `close(jobs)`?
+
+After all jobs have been sent:
+
+```go
+for i := 1; i <= 10; i++ {
+    jobs <- i
+}
+
+close(jobs)
+```
+
+`close(jobs)` tells workers that no more jobs will be sent.
+
+Workers using:
+
+```go
+for job := range jobs {
+    // process job
+}
+```
+
+finish existing jobs and stop when the channel is closed and empty.
+
+## Why Use `WaitGroup`?
+
+`wg.Wait()` ensures that `main` waits for all workers to finish.
+
+```text
+Workers
+   ↓
+wg.Done()
+   ↓
+wg.Wait()
+   ↓
+main continues
+```
+
+Without `WaitGroup`, `main` could return while workers are still processing.
+
+Remember:
+
+```text
+select
+→ waits for channel operations
+
+WaitGroup
+→ waits for goroutines to finish
+```
+
+## Worker Count Experiment
+
+Try:
+
+```go
+for i := 1; i <= 1; i++ {
+```
+
+Then:
 
 ```bash
-go run .
+time go run .
 ```
 
-The output will be sequential:
-
-```text
-hello 0
-hello 1
-hello 2
-world 0
-world 1
-world 2
-```
-
-## Why Does the Order Change?
-
-With:
+Try again with:
 
 ```go
-go say("hello")
-go say("world")
+for i := 1; i <= 5; i++ {
 ```
 
-both functions run as goroutines.
+Compare the execution time.
 
-The Go runtime scheduler determines when each goroutine gets execution time, so the exact output order is not guaranteed.
-
-## Important
-
-This playground uses:
+Each job sleeps for:
 
 ```go
-time.Sleep(time.Second)
+time.Sleep(500 * time.Millisecond)
 ```
 
-only to keep the main function alive long enough to observe the goroutines.
-
-Do not use `time.Sleep` as a synchronization mechanism in production code.
-
-Later, synchronization tools such as `WaitGroup`, channels, and context will be used for proper goroutine lifecycle management.
+More workers allow more jobs to be processed concurrently.
 
 ## Key Takeaway
 
-A goroutine is started with the `go` keyword:
-
-```go
-go say("hello")
-```
-
-The important distinction is:
+A worker pool combines:
 
 ```text
-Sequential
-    ↓
-function A finishes
-    ↓
-function B starts
-
-Concurrent
-    ↓
-function A and B can make progress independently
+Goroutines
+    +
+Channel
+    +
+WaitGroup
 ```
 
-This is the foundation for the next topics:
+to process many jobs with controlled concurrency.
 
 ```text
-Goroutine
-   ↓
-Race Condition
-   ↓
-Synchronization
-   ↓
-Mutex / Channel
+Producer
+    ↓
+Job Channel
+    ↓
+Limited Workers
+    ↓
+Processed Jobs
 ```
+
+The important idea is:
+
+> A worker pool controls how many jobs can execute concurrently instead of creating an unlimited number of workers.
