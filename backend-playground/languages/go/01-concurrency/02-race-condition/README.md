@@ -1,27 +1,26 @@
-# Goroutine
+# Race Condition
 
-This playground demonstrates the basic use of goroutines in Go.
+This playground demonstrates a **data race** caused by multiple goroutines accessing shared data concurrently without synchronization.
 
 ## Goal
 
-Understand the difference between sequential execution and concurrent execution.
+Create a race condition and detect it using Go's race detector.
 
 ```text
-Without goroutine:
-
-say hello
-   ↓
-finish
-   ↓
-say world
+Goroutine 1 ──┐
+Goroutine 2 ──┤
+Goroutine 3 ──┼──→ shared counter
+Goroutine 4 ──┤
+Goroutine 5 ──┘
 ```
 
-With goroutines:
+## Structure
 
 ```text
-        ┌── say hello
-main ───┤
-        └── say world
+02-race-condition/
+├── README.md
+├── go.mod
+└── main.go
 ```
 
 ## Setup
@@ -29,10 +28,7 @@ main ───┤
 This playground is isolated and has its own Go module.
 
 ```bash
-mkdir -p languages/go/01-concurrency
-cd languages/go/01-concurrency
-
-go mod init concurrency-playground
+go mod init race-condition-playground
 ```
 
 ## Practice
@@ -44,126 +40,159 @@ package main
 
 import (
     "fmt"
-    "time"
+    "sync"
 )
 
-func say(message string) {
-    for i := 0; i < 3; i++ {
-        fmt.Println(message, i)
-        time.Sleep(100 * time.Millisecond)
-    }
-}
-
 func main() {
-    go say("hello")
-    go say("world")
+    var counter int
+    var wg sync.WaitGroup
 
-    time.Sleep(time.Second)
+    for i := 0; i < 1000; i++ {
+        wg.Add(1)
+
+        go func() {
+            defer wg.Done()
+            counter++
+        }()
+    }
+
+    wg.Wait()
+
+    fmt.Println("counter:", counter)
 }
 ```
 
-Run:
+## Run
 
 ```bash
 go run .
 ```
 
-The output order can vary:
+The result may sometimes be:
 
 ```text
-hello 0
-world 0
-world 1
-hello 1
-hello 2
-world 2
+counter: 1000
 ```
 
-Another run may produce a different order.
+Do not assume this means the code is safe.
 
-## Sequential Version
-
-Remove `go`:
+The problem is concurrent access to the same variable:
 
 ```go
-say("hello")
-say("world")
+counter++
 ```
+
+## Detect the Race
 
 Run:
 
 ```bash
-go run .
+go run -race .
 ```
 
-The output will be sequential:
+You should see a warning similar to:
 
 ```text
-hello 0
-hello 1
-hello 2
-world 0
-world 1
-world 2
+WARNING: DATA RACE
 ```
 
-## Why Does the Order Change?
+The race detector reports concurrent accesses to shared memory that are not properly synchronized.
 
-With:
+You can also use it with tests:
+
+```bash
+go test -race ./...
+```
+
+## Why Does `counter++` Race?
+
+Conceptually, this:
 
 ```go
-go say("hello")
-go say("world")
+counter++
 ```
 
-both functions run as goroutines.
+involves multiple steps:
 
-The Go runtime scheduler determines when each goroutine gets execution time, so the exact output order is not guaranteed.
+```text
+READ counter
+     ↓
+ADD 1
+     ↓
+WRITE counter
+```
+
+Two goroutines can interleave these operations.
+
+Example:
+
+```text
+counter = 10
+
+Goroutine A → read 10
+Goroutine B → read 10
+
+Goroutine A → write 11
+Goroutine B → write 11
+
+Expected: 12
+Actual:   11
+```
+
+The exact result is not guaranteed.
+
+## The Problem
+
+Many goroutines access the same variable:
+
+```text
+Goroutine 1 ──┐
+Goroutine 2 ──┤
+Goroutine 3 ──┼──→ counter
+Goroutine 4 ──┤
+Goroutine 5 ──┘
+```
+
+There is no synchronization protecting the shared state.
 
 ## Important
 
-This playground uses:
+Do not fix this playground yet.
 
-```go
-time.Sleep(time.Second)
-```
+The purpose of this exercise is to:
 
-only to keep the main function alive long enough to observe the goroutines.
+1. Create a race condition.
+2. Run the program.
+3. Use `-race`.
+4. Observe the `DATA RACE` warning.
+5. Understand why concurrent access is unsafe.
 
-Do not use `time.Sleep` as a synchronization mechanism in production code.
-
-Later, synchronization tools such as `WaitGroup`, channels, and context will be used for proper goroutine lifecycle management.
+The next exercise will fix this problem using a mutex.
 
 ## Key Takeaway
 
-A goroutine is started with the `go` keyword:
-
-```go
-go say("hello")
+```text
+Concurrent goroutines
+        +
+Shared mutable data
+        +
+No synchronization
+        ↓
+Data Race
 ```
 
-The important distinction is:
+The important command:
 
-```text
-Sequential
-    ↓
-function A finishes
-    ↓
-function B starts
-
-Concurrent
-    ↓
-function A and B can make progress independently
+```bash
+go run -race .
 ```
 
-This is the foundation for the next topics:
+The race detector is a development tool for finding unsafe concurrent memory access.
+
+Next:
 
 ```text
-Goroutine
-   ↓
 Race Condition
-   ↓
-Synchronization
-   ↓
-Mutex / Channel
+      ↓
+Mutex
 ```
