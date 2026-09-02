@@ -1,169 +1,363 @@
-# Goroutine
+# 07 - Goroutine Leak
 
-This playground demonstrates the basic use of goroutines in Go.
+## What is a Goroutine Leak?
 
-## Goal
+A **goroutine leak** occurs when a goroutine that is no longer needed remains alive because it has no way to stop.
 
-Understand the difference between sequential execution and concurrent execution.
+A leaked goroutine is commonly:
 
-```text
-Without goroutine:
+- blocked
+- waiting on a channel
+- waiting on a context or event
+- waiting for something that will never happen
+- missing a clear exit condition
 
-say hello
-   ↓
-finish
-   ↓
-say world
-```
+As long as the program is running, the leaked goroutine continues to consume resources.
 
-With goroutines:
-
-```text
-        ┌── say hello
-main ───┤
-        └── say world
-```
-
-## Setup
-
-This playground is isolated and has its own Go module.
-
-```bash
-mkdir -p languages/go/01-concurrency
-cd languages/go/01-concurrency
-
-go mod init concurrency-playground
-```
-
-## Practice
-
-Create `main.go`:
+## Example of a Goroutine Leak
 
 ```go
 package main
 
 import (
-    "fmt"
-    "time"
+	"fmt"
+	"time"
 )
 
-func say(message string) {
-    for i := 0; i < 3; i++ {
-        fmt.Println(message, i)
-        time.Sleep(100 * time.Millisecond)
-    }
+func worker(jobs <-chan int) {
+	fmt.Println("worker started")
+
+	for job := range jobs {
+		fmt.Println("processing job:", job)
+	}
+
+	fmt.Println("worker stopped")
 }
 
 func main() {
-    go say("hello")
-    go say("world")
+	jobs := make(chan int)
 
-    time.Sleep(time.Second)
+	go worker(jobs)
+
+	jobs <- 1
+	jobs <- 2
+	jobs <- 3
+
+	time.Sleep(1 * time.Second)
+
+	fmt.Println("main still running")
+
+	time.Sleep(10 * time.Second)
+
+	fmt.Println("main finished")
 }
 ```
 
-Run:
+After job `3` is processed, the worker tries to receive another job through:
 
-```bash
-go run .
+```go
+for job := range jobs
 ```
 
-The output order can vary:
+But the channel is still open and no new data is being sent.
+
+The worker therefore becomes:
 
 ```text
-hello 0
-world 0
-world 1
-hello 1
-hello 2
-world 2
+processing job: 3
+        ↓
+waiting for the next job
+        ↓
+BLOCKED
+        ↓
+still alive
 ```
 
-Another run may produce a different order.
-
-## Sequential Version
-
-Remove `go`:
+The worker never reaches:
 
 ```go
-say("hello")
-say("world")
+fmt.Println("worker stopped")
 ```
 
-Run:
+because `jobs` is never closed.
 
-```bash
-go run .
-```
+## Why Is It Called a Leak?
 
-The output will be sequential:
+In a long-running server, leaked goroutines can accumulate:
 
 ```text
-hello 0
-hello 1
-hello 2
-world 0
-world 1
-world 2
+request 1 → goroutine → blocked
+request 2 → goroutine → blocked
+request 3 → goroutine → blocked
+...
 ```
 
-## Why Does the Order Change?
+Over time:
 
-With:
+```text
+1 goroutine
+    ↓
+10 goroutines
+    ↓
+100 goroutines
+    ↓
+1,000 goroutines
+    ↓
+more resources being consumed
+```
+
+This is a goroutine leak.
+
+## Why Can `main()` Still Finish?
+
+Go does **not** automatically wait for all goroutines to finish.
+
+When:
 
 ```go
-go say("hello")
-go say("world")
+main()
 ```
 
-both functions run as goroutines.
+returns, the program exits.
 
-The Go runtime scheduler determines when each goroutine gets execution time, so the exact output order is not guaranteed.
+Any goroutine that is still blocked also stops because the entire process has exited.
 
-## Important
+So a goroutine leak does **not** mean that the program can never exit.
 
-This playground uses:
+The actual problem is:
+
+> While the program is still running, the leaked goroutine remains alive and consumes resources.
+
+This becomes especially important for long-running applications such as servers.
+
+## Open Channel vs Closed Channel
+
+For:
 
 ```go
-time.Sleep(time.Second)
+for job := range jobs
 ```
 
-only to keep the main function alive long enough to observe the goroutines.
+there are three important conditions.
 
-Do not use `time.Sleep` as a synchronization mechanism in production code.
+### 1. Channel is open + has data
 
-Later, synchronization tools such as `WaitGroup`, channels, and context will be used for proper goroutine lifecycle management.
+```text
+channel
+   ↓
+has job
+   ↓
+worker receives it
+   ↓
+process
+```
+
+### 2. Channel is open + empty
+
+```text
+channel
+   ↓
+no job
+   ↓
+worker waits
+   ↓
+BLOCKED
+```
+
+If nothing will ever send another job, this can become a goroutine leak.
+
+### 3. Channel is closed + empty
+
+```text
+channel closed
+   ↓
+no data remaining
+   ↓
+range ends
+   ↓
+worker returns
+   ↓
+goroutine finishes
+```
+
+This is why `close(jobs)` can be part of the worker lifecycle.
+
+## Simple Fix
+
+If there are no more jobs:
+
+```go
+close(jobs)
+```
+
+Example:
+
+```go
+func worker(jobs <-chan int) {
+	for job := range jobs {
+		fmt.Println("processing job:", job)
+	}
+
+	fmt.Println("worker stopped")
+}
+
+func main() {
+	jobs := make(chan int)
+
+	go worker(jobs)
+
+	jobs <- 1
+	jobs <- 2
+	jobs <- 3
+
+	close(jobs)
+}
+```
+
+The flow becomes:
+
+```text
+job 1
+ ↓
+job 2
+ ↓
+job 3
+ ↓
+close(jobs)
+ ↓
+range ends
+ ↓
+worker stopped
+ ↓
+goroutine finishes
+```
+
+## Don't Close a Channel Randomly
+
+The channel should generally be closed by the side responsible for **sending values**, not by the receiver.
+
+The producer knows when there will be no more jobs:
+
+```go
+jobs <- 1
+jobs <- 2
+close(jobs)
+```
+
+The worker simply receives:
+
+```go
+for job := range jobs {
+	// process
+}
+```
+
+## Goroutine Leaks Are Not Only Caused by Channels
+
+A goroutine can also leak while waiting for something else.
+
+Example:
+
+```go
+func worker(ch <-chan int) {
+	value := <-ch
+	fmt.Println(value)
+}
+```
+
+If no sender ever sends a value:
+
+```text
+worker
+  ↓
+<-ch
+  ↓
+BLOCKED
+  ↓
+waits forever
+```
+
+## Context Cancellation
+
+For goroutines that need to run continuously, `context.Context` can provide a clear cancellation mechanism.
+
+```go
+func worker(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("worker stopped")
+			return
+
+		default:
+			fmt.Println("worker working...")
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+```
+
+When:
+
+```go
+cancel()
+```
+
+is called:
+
+```text
+cancel()
+   ↓
+ctx.Done()
+   ↓
+worker receives the signal
+   ↓
+return
+   ↓
+goroutine finishes
+```
 
 ## Key Takeaway
 
-A goroutine is started with the `go` keyword:
+> **A goroutine leak is a goroutine that gets "stuck" and cannot, or does not have a chance to, stop when it should.**
 
-```go
-go say("hello")
-```
+Whenever you create a goroutine, ask:
 
-The important distinction is:
+1. Who creates this goroutine?
+2. What makes it stop?
+3. Can it `return`?
+4. Will the channel be closed?
+5. Is there a cancellation mechanism?
+6. Can it become blocked forever?
+
+If you cannot answer:
+
+> **"When does this goroutine stop?"**
+
+then the goroutine's lifecycle should be reviewed.
+
+## Mental Model
+
+A healthy goroutine:
 
 ```text
-Sequential
-    ↓
-function A finishes
-    ↓
-function B starts
-
-Concurrent
-    ↓
-function A and B can make progress independently
+START
+  ↓
+WORK
+  ↓
+STOP CONDITION
+  ↓
+RETURN
 ```
 
-This is the foundation for the next topics:
+A leaked goroutine:
 
 ```text
-Goroutine
-   ↓
-Race Condition
-   ↓
-Synchronization
-   ↓
-Mutex / Channel
+START
+  ↓
+WORK
+  ↓
+BLOCKED
+  ↓
+never returns
 ```
