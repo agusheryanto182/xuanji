@@ -1,4 +1,4 @@
-package escapeanalysis
+package main
 
 import "testing"
 

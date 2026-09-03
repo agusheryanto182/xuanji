@@ -1,4 +1,4 @@
-package allocation
+package main
 
 import "testing"
 
