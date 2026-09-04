@@ -12,14 +12,17 @@ func BenchmarkMapLookup(b *testing.B) {
 	for i := 0; i < benchmarkEntries; i++ {
 		m[i] = i
 	}
+
 	b.ResetTimer()
-	for i := 0; b.Loop(); i++ {
+	i := 0
+	for b.Loop() {
 		sinkValue = m[i%benchmarkEntries]
+		i++
 	}
 }
 
 func BenchmarkMapBuild(b *testing.B) {
-	for i := 0; b.Loop(); i++ {
+	for b.Loop() {
 		m := make(map[int]int, benchmarkEntries)
 		for j := 0; j < benchmarkEntries; j++ {
 			m[j] = j
@@ -29,7 +32,7 @@ func BenchmarkMapBuild(b *testing.B) {
 }
 
 func BenchmarkMapDeleteAll(b *testing.B) {
-	for i := 0; b.Loop(); i++ {
+	for b.Loop() {
 		m := make(map[int]int, benchmarkEntries)
 		for j := 0; j < benchmarkEntries; j++ {
 			m[j] = j
@@ -42,7 +45,7 @@ func BenchmarkMapDeleteAll(b *testing.B) {
 }
 
 func BenchmarkMapClear(b *testing.B) {
-	for i := 0; b.Loop(); i++ {
+	for b.Loop() {
 		m := make(map[int]int, benchmarkEntries)
 		for j := 0; j < benchmarkEntries; j++ {
 			m[j] = j

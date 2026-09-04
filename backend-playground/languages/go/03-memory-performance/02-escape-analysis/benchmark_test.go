@@ -6,13 +6,18 @@ var sinkUserPointer *User
 var sinkUserValue User
 
 func BenchmarkBuildUserPointer(b *testing.B) {
-	for i := 0; b.Loop(); i++ {
+	i := 0
+	for b.Loop() {
 		sinkUserPointer = buildUserPointer(i)
+		i++
 	}
 }
 
 func BenchmarkBuildUserValue(b *testing.B) {
-	for i := 0; b.Loop(); i++ {
+	i := 0
+
+	for b.Loop() {
 		sinkUserValue = buildUserValue(i)
+		i++
 	}
 }
