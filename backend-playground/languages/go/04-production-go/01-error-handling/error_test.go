@@ -24,6 +24,7 @@ func TestAsFindsTypedError(t *testing.T) {
 	)
 
 	var validationErr *ValidationError
+
 	if !errors.As(err, &validationErr) {
 		t.Fatal("expected errors.As to find ValidationError")
 	}
@@ -37,6 +38,6 @@ func TestPercentVBreaksIdentity(t *testing.T) {
 	err := fmt.Errorf("get user: %v", ErrUserNotFound)
 
 	if errors.Is(err, ErrUserNotFound) {
-		t.Fatal("expected %v formatting not to preserve the wrapped identity")
+		t.Fatal("expected non-wrapping formatting not to preserve the error identity")
 	}
 }
